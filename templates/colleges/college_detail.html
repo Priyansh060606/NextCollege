@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ college.name }} — IntelliCounsel AI{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="flex items-center gap-5 mb-8">
+    <a href="{% url 'college_list' %}" class="w-9 h-9 bg-surface-container-high rounded-2xl flex items-center justify-center hover:bg-surface-container-highest transition-colors">
+        <span class="material-symbols-outlined text-[20px] text-on-surface-variant">arrow_back</span>
+    </a>
+    <div>
+        <h2 class="font-headline-md text-headline-md text-on-surface">{{ college.name }}</h2>
+        <p class="font-label-mono text-[15px] text-on-surface-variant uppercase tracking-widest">{{ college.state }}{% if college.nirf_rank %} · NIRF #{{ college.nirf_rank }}{% endif %}</p>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-px bg-outline-variant rounded-2xl overflow-hidden mb-8 shadow-sm">
+    <div class="bg-white p-8 text-center">
+        <p class="font-label-mono text-[10px] text-on-surface-variant uppercase tracking-widest mb-1">Programs</p>
+        <p class="font-stat-lg text-[28px] font-bold text-primary">{{ branches|length }}</p>
+    </div>
+    {% if college.nirf_rank %}
+    <div class="bg-white p-8 text-center">
+        <p class="font-label-mono text-[10px] text-on-surface-variant uppercase tracking-widest mb-1">NIRF Rank</p>
+        <p class="font-stat-lg text-[28px] font-bold text-secondary">#{{ college.nirf_rank }}</p>
+    </div>
+    {% endif %}
+    {% if cutoff_trends %}
+    <div class="bg-white p-8 text-center">
+        <p class="font-label-mono text-[10px] text-on-surface-variant uppercase tracking-widest mb-1">Years of Data</p>
+        <p class="font-stat-lg text-[28px] font-bold text-primary">{{ cutoff_trends|length }}</p>
+    </div>
+    {% endif %}
+    <div class="bg-white p-8 text-center">
+        <p class="font-label-mono text-[10px] text-on-surface-variant uppercase tracking-widest mb-1">Latest Year</p>
+        <p class="font-stat-lg text-[28px] font-bold text-primary">{{ latest_year|default:"—" }}</p>
+    </div>
+</div>
+
+<!-- Branch-wise Cutoffs -->
+{% if branch_cutoffs %}
+<section class="mb-10">
+    <h3 class="font-label-mono text-[15px] font-bold text-secondary uppercase tracking-widest mb-6 border-l-4 border-secondary pl-3">
+        Branch-wise Cutoffs ({{ latest_year }} · OPEN · Gender-Neutral · Round 1)
+    </h3>
+    <div class="overflow-hidden border border-outline-variant rounded-2xl">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-primary text-on-primary">
+                    <th class="font-label-mono text-[15px] py-3.5 px-5 uppercase">#</th>
+                    <th class="font-label-mono text-[15px] py-3.5 px-5 uppercase">Program</th>
+                    <th class="font-label-mono text-[15px] py-3.5 px-5 uppercase text-center">Opening Rank</th>
+                    <th class="font-label-mono text-[15px] py-3.5 px-5 uppercase text-center">Closing Rank</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant">
+                {% for bc in branch_cutoffs %}
+                <tr class="{% if forloop.counter|divisibleby:2 %}bg-surface-container-lowest{% else %}bg-white{% endif %} hover:bg-surface-container transition-colors">
+                    <td class="py-3.5 px-5 font-label-mono text-[15px] text-on-surface-variant">{{ forloop.counter }}</td>
+                    <td class="py-3.5 px-5 text-[15px] text-primary font-medium">{{ bc.branch|truncatechars:60 }}</td>
+                    <td class="py-3.5 px-5 text-center font-label-mono text-[15px]">{{ bc.opening_rank }}</td>
+                    <td class="py-3.5 px-5 text-center font-bold text-secondary text-[15px]">{{ bc.closing_rank }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endif %}
+
+<!-- Year-over-Year Trends -->
+{% if cutoff_trends %}
+<section class="mb-10">
+    <h3 class="font-label-mono text-[15px] font-bold text-secondary uppercase tracking-widest mb-6 border-l-4 border-secondary pl-3">
+        Year-over-Year Cutoff Trend (OPEN · Gender-Neutral)
+    </h3>
+    <div class="overflow-hidden border border-outline-variant rounded-2xl">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-surface-container-low">
+                    <th class="font-label-mono text-[15px] py-3.5 px-5 uppercase text-on-surface-variant">Year</th>
+                    <th class="font-label-mono text-[15px] py-3.5 px-5 uppercase text-center text-on-surface-variant">Avg Closing Rank</th>
+                    <th class="font-label-mono text-[15px] py-3.5 px-5 uppercase text-center text-on-surface-variant">Best Cutoff</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant">
+                {% for trend in cutoff_trends %}
+                <tr class="bg-white hover:bg-surface-container transition-colors">
+                    <td class="py-3.5 px-5 font-bold text-primary">{{ trend.year }}</td>
+                    <td class="py-3.5 px-5 text-center font-label-mono text-[15px]">{{ trend.avg_closing|floatformat:0 }}</td>
+                    <td class="py-3.5 px-5 text-center font-bold text-on-tertiary-container">{{ trend.min_closing }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endif %}
+
+<!-- Available Programs -->
+<section class="mb-8">
+    <h3 class="font-label-mono text-[15px] font-bold text-secondary uppercase tracking-widest mb-6 border-l-4 border-secondary pl-3">
+        All Programs ({{ branches|length }})
+    </h3>
+    <div class="flex flex-wrap gap-2">
+        {% for branch in branches %}
+        <span class="bg-surface-container-low text-on-surface text-[15px] font-medium border border-outline-variant py-1.5 px-3 rounded-2xl">{{ branch|truncatechars:50 }}</span>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- CTA -->
+<a href="{% url 'predict' %}" class="inline-flex items-center gap-2 bg-primary text-on-primary font-bold py-4 px-8 rounded-2xl hover:opacity-90 transition-all">
+    <span class="material-symbols-outlined text-[20px]">query_stats</span>
+    Predict Your Chances at {{ college.short_name|default:college.name|truncatechars:20 }}
+</a>
+{% endblock %}

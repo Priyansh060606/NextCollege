@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+
+{% block title %}Prediction Results — IntelliCounsel AI{% endblock %}
+
+{% block extra_head %}
+<style>
+    .ai-border-gradient {
+        border: 1px solid transparent;
+        background: linear-gradient(white, white) padding-box, linear-gradient(to bottom right, #9c42f4, #2c4de1) border-box;
+    }
+    .ai-pill-glow {
+        box-shadow: 0 0 15px rgba(130, 29, 218, 0.15);
+    }
+    .college-card {
+        transition: all 0.3s ease-in-out;
+    }
+    .college-card.hidden {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<header class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
+    <div>
+        <nav class="flex items-center gap-2 text-on-surface-variant font-label-md text-sm mb-2">
+            <span>Predictor</span>
+            <span class="material-symbols-outlined text-sm">chevron_right</span>
+            <span class="text-primary">Results</span>
+        </nav>
+        <h2 class="font-headline-md text-3xl font-bold text-on-surface mb-2">Admission Probability Results</h2>
+        <div class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full border border-outline-variant/30">
+                <span class="material-symbols-outlined text-primary text-base">military_tech</span>
+                <span class="font-label-md text-on-surface">AIR Rank: <span class="text-primary">{{ rank }}</span></span>
+            </div>
+            <div class="flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full border border-outline-variant/30">
+                <span class="material-symbols-outlined text-secondary text-base">tune</span>
+                <span class="font-label-md text-on-surface">Category: <span class="text-secondary">{{ category }}</span></span>
+            </div>
+        </div>
+    </div>
+    <a href="{% url 'report' %}" class="flex items-center justify-center gap-2 bg-primary text-on-primary px-6 py-4 rounded-xl font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all w-full md:w-auto">
+        <span class="material-symbols-outlined">download</span>
+        Download Analysis Report
+    </a>
+</header>
+
+<!-- AI Summary Widget -->
+<section class="ai-border-gradient rounded-2xl p-8 mb-12 flex flex-col md:flex-row items-start md:items-center gap-8 bg-white relative overflow-hidden">
+    <div class="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+        <span class="material-symbols-outlined text-[120px]">auto_awesome</span>
+    </div>
+    <div class="w-16 h-16 rounded-full bg-secondary-container/20 flex items-center justify-center shrink-0 shadow-inner">
+        <span class="material-symbols-outlined text-secondary text-[32px]" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+    </div>
+    <div class="flex-grow z-10">
+        <div class="flex items-center gap-2 mb-2">
+            <span class="font-label-md text-secondary uppercase tracking-widest text-[15px] font-bold">AI Insight Summary</span>
+            <span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-[10px] font-bold border border-secondary/20">High Confidence</span>
+        </div>
+        <p class="text-on-surface font-body-lg text-sm md:text-base leading-relaxed">Based on your rank of <span class="font-bold text-primary">{{ rank }}</span>, we found <span class="font-bold">{{ results|length }}</span> matching options. We recommend focusing on choice-filling for <span class="text-secondary font-bold">Target</span> institutions first.</p>
+    </div>
+    <div class="flex gap-2 shrink-0 z-10 w-full md:w-auto justify-end">
+        <a href="{% url 'recommend' %}" class="px-5 py-4 bg-secondary text-white rounded-xl text-center shadow-md hover:bg-opacity-90 font-bold flex items-center justify-center gap-2 transition-colors">
+            <span class="material-symbols-outlined text-lg">lightbulb</span> Strategy
+        </a>
+    </div>
+</section>
+
+<!-- Categorization Tabs/Bento Grid -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <!-- Left: Tab Triggers (Visual) -->
+    <div class="lg:col-span-3 space-y-3 sticky top-24">
+        <button class="w-full flex items-center justify-between p-8 rounded-2xl bg-white shadow-sm border border-outline-variant/30 hover:border-orange-500/50 transition-all text-left group tab-trigger" id="tab-dream" onclick="switchTab('dream')">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 group-[.active]:bg-orange-500 group-[.active]:text-white transition-colors">
+                    <span class="material-symbols-outlined">rocket_launch</span>
+                </div>
+                <div>
+                    <p class="font-label-md text-on-surface font-bold">Dream</p>
+                    <p class="text-[15px] text-on-surface-variant">Probability &lt; 40%</p>
+                </div>
+            </div>
+            <span class="material-symbols-outlined text-outline group-[.active]:text-primary">chevron_right</span>
+        </button>
+        <button class="w-full flex items-center justify-between p-8 rounded-2xl bg-white shadow-sm border border-outline-variant/30 hover:border-primary/50 transition-all text-left group tab-trigger active border-2 border-primary" id="tab-target" onclick="switchTab('target')">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-primary-container/10 flex items-center justify-center text-primary group-[.active]:bg-primary group-[.active]:text-white transition-colors bg-primary text-white">
+                    <span class="material-symbols-outlined">location_on</span>
+                </div>
+                <div>
+                    <p class="font-label-md text-on-surface font-bold">Target</p>
+                    <p class="text-[15px] text-on-surface-variant">Probability 40-79%</p>
+                </div>
+            </div>
+            <span class="material-symbols-outlined text-primary">chevron_right</span>
+        </button>
+        <button class="w-full flex items-center justify-between p-8 rounded-2xl bg-white shadow-sm border border-outline-variant/30 hover:border-green-500/50 transition-all text-left group tab-trigger" id="tab-safe" onclick="switchTab('safe')">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center text-green-600 group-[.active]:bg-green-500 group-[.active]:text-white transition-colors">
+                    <span class="material-symbols-outlined">verified_user</span>
+                </div>
+                <div>
+                    <p class="font-label-md text-on-surface font-bold">Safe</p>
+                    <p class="text-[15px] text-on-surface-variant">Probability &ge; 80%</p>
+                </div>
+            </div>
+            <span class="material-symbols-outlined text-outline group-[.active]:text-primary">chevron_right</span>
+        </button>
+        
+        <!-- Upgrade CTA Card -->
+        <div class="bg-gradient-to-br from-primary to-secondary rounded-2xl p-8 flex flex-col justify-between text-white relative overflow-hidden group mt-6 hidden md:flex">
+            <div class="absolute -right-8 -top-8 w-24 h-24 bg-white/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
+            <div class="relative z-10">
+                <span class="bg-white/20 backdrop-blur-sm text-white px-2 py-1 rounded text-[10px] font-bold mb-5 inline-block tracking-widest">PRO</span>
+                <h4 class="font-headline-sm text-white mb-2 text-sm font-bold leading-tight">Get expert counseling from ex-IITians.</h4>
+                <p class="text-[15px] opacity-80 mb-6 leading-relaxed">Our experts help you navigate choice-filling.</p>
+                <button class="w-full bg-white text-primary py-2.5 rounded-lg text-xs font-bold hover:bg-surface-container-lowest transition-colors shadow-sm">Book Session</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Content Display -->
+    <div class="lg:col-span-9">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+            <h3 class="font-headline-sm text-xl font-bold text-on-surface" id="section-title">Target Colleges for You</h3>
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-on-surface-variant font-bold uppercase tracking-wider">Sort by:</span>
+                <select class="bg-surface border-outline-variant/30 rounded-lg text-sm text-primary font-bold focus:ring-primary cursor-pointer px-3 py-1.5">
+                    <option>Probability (High to Low)</option>
+                    <option>Previous Cutoff</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Bento Style Grid for Colleges -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="college-container">
+            {% for result in results %}
+            <div class="college-card group bg-white rounded-2xl border border-outline-variant/30 overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300" data-category="{% if result.prob < 40 %}dream{% elif result.prob < 75 %}target{% else %}safe{% endif %}">
+                <div class="h-32 bg-surface-container relative overflow-hidden">
+                    <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style="background-image: url('{% cycle 'https://lh3.googleusercontent.com/aida-public/AB6AXuCFXc19Fam6VH5x0k9c0fod30VeFz-VRatjAprCnTcy3XhtaGwh2z5lM8giir4gc6TL7-Wrutb9rMXuo6uQTniA2EBBFfpQeqGkolyv62Gn39hnz1Gcb8EKZL8MOW-XPXbSBLI_zm-T6F4NLKVd5EU0Amb5eZrE1yTUlmmtT0edT1_sxWiVdzXvvJSJO8AHFheLFlEdADOOXeBQCmZ2_7viZO93FEEFhpI8l0iAR1vTK-FZv4aTg5rICQ' 'https://lh3.googleusercontent.com/aida-public/AB6AXuCz7VFk49326yy0xW882o5D8wzzebfgTV57oG7vnI97BNuC43q39U7inVZ0M8L13_ITodgw6QNFr_ONLMijBabRGcmNwsda7j8rQqVg1T6B-jHe1SrMOSAY8CAbzdyx4QzIdpTJyZNtrVoI4-7ZwXPxTwQXCRt1qpM5NTvTZGG976xM4QEFYeDFbJxuGFi8lMzCSJTLgE4nEtJfRwKnhR-HC0PBqQ0qBUEI6niGUXvDdOR-Q3kQNiqUmA' 'https://lh3.googleusercontent.com/aida-public/AB6AXuA4r8iqEwsoCjp98n_W1uhWj8DDlsxt8G3iGiGb9AGF9jG5Xw6aWjyKydi4l3gl5a176j4kxXw2reXlRdLs3TZ5-jtRR7lu1h_9eIuEkkUgG15yzI1nLucFQQjlWHjRRtME3IPfQxOPZLM_KNP49DteOa0RlOq4-Y8jf4W7G0XGVqrQCzrluB1VLs44a3lRj8fPcGuZGgpMbwLpVp9hvmrZ2TeygiWxcjvg0jjGtGp-tD0lgDGKY9Dqaw' %}')"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <div class="absolute bottom-3 left-4 right-4 flex justify-between items-end">
+                        <span class="bg-white/20 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border border-white/20">Prev. Cutoff: {{ result.closing_rank|default:"—" }}</span>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="pr-2">
+                            <h4 class="font-bold text-[16px] text-on-surface group-hover:text-primary transition-colors leading-tight mb-1">{{ result.college_name }}</h4>
+                            <p class="text-on-surface-variant text-[15px]">{{ result.branch_name }}</p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <div class="flex items-center justify-center w-12 h-12 rounded-full border-[3px] {% if result.prob < 40 %}border-error/20 text-error{% elif result.prob < 75 %}border-secondary/20 text-secondary{% else %}border-on-tertiary-container/20 text-on-tertiary-container{% endif %} relative">
+                                <span class="text-[15px] font-bold">{{ result.prob }}%</span>
+                                <svg class="absolute inset-0 -rotate-90 w-full h-full" viewbox="0 0 36 36">
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" class="{% if result.prob < 40 %}stroke-error{% elif result.prob < 75 %}stroke-secondary{% else %}stroke-on-tertiary-container{% endif %}" stroke-dasharray="{{ result.prob }}, 100" stroke-width="3"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between pt-4 border-t border-outline-variant/20">
+                        <a class="text-primary font-bold text-sm flex items-center gap-1 hover:gap-2 transition-all" href="#">
+                            View Details <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                        </a>
+                        <button class="w-8 h-8 rounded-full border border-outline-variant/40 flex items-center justify-center text-on-surface-variant hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">bookmark_add</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="md:col-span-2 text-center py-16 bg-white border border-outline-variant/30 rounded-2xl">
+                <span class="material-symbols-outlined text-[48px] text-outline mb-5 block">search_off</span>
+                <p class="font-bold text-primary text-[18px] mb-2">No matching results found</p>
+                <p class="text-on-surface-variant text-[15px]">Try adjusting your rank or category in the predictor.</p>
+                <a href="{% url 'predict' %}" class="inline-block mt-4 px-6 py-2 bg-surface-container border border-outline-variant/50 rounded-lg text-primary font-bold hover:bg-surface-container-high transition-colors">Predict Again</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function switchTab(type) {
+        // Update Tab styles
+        const tabs = document.querySelectorAll('.tab-trigger');
+        tabs.forEach(tab => {
+            tab.classList.remove('active', 'border-2', 'border-primary');
+            tab.classList.add('border-outline-variant/30');
+            const iconDiv = tab.querySelector('div > div');
+            iconDiv.classList.remove('bg-orange-500', 'bg-primary', 'bg-green-500', 'text-white');
+            
+            if(tab.id.includes('dream')) iconDiv.classList.add('bg-orange-100', 'text-orange-600');
+            if(tab.id.includes('target')) iconDiv.classList.add('bg-primary-container/10', 'text-primary');
+            if(tab.id.includes('safe')) iconDiv.classList.add('bg-green-100', 'text-green-600');
+        });
+
+        const activeTab = document.getElementById(`tab-${type}`);
+        activeTab.classList.add('active', 'border-2', 'border-primary');
+        activeTab.classList.remove('border-outline-variant/30');
+        const activeIconDiv = activeTab.querySelector('div > div');
+        activeIconDiv.classList.remove('bg-orange-100', 'bg-primary-container/10', 'bg-green-100', 'text-orange-600', 'text-primary', 'text-green-600');
+        
+        if(type === 'dream') {
+            activeIconDiv.classList.add('bg-orange-500', 'text-white');
+            document.getElementById('section-title').innerText = "Dream Colleges (Ambitious)";
+        } else if(type === 'target') {
+            activeIconDiv.classList.add('bg-primary', 'text-white');
+            document.getElementById('section-title').innerText = "Target Colleges for You";
+        } else {
+            activeIconDiv.classList.add('bg-green-500', 'text-white');
+            document.getElementById('section-title').innerText = "Safe Colleges (High Probability)";
+        }
+
+        // Filter colleges
+        const colleges = document.querySelectorAll('.college-card');
+        colleges.forEach(card => {
+            if (card.dataset.category === type || type === 'all') {
+                card.classList.remove('hidden');
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+
+        // Simple reveal animation for content
+        const container = document.getElementById('college-container');
+        container.style.opacity = 0;
+        container.style.transform = 'translateY(10px)';
+        setTimeout(() => {
+            container.style.opacity = 1;
+            container.style.transform = 'translateY(0)';
+        }, 50);
+    }
+    
+    // Initialize tab state on load
+    document.addEventListener('DOMContentLoaded', () => {
+        switchTab('target');
+    });
+</script>
+{% endblock %}

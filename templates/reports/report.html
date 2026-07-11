@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block title %}Admission Forecast Report — IntelliCounsel AI{% endblock %}
+
+{% block content %}
+<!-- Controls -->
+<div class="flex justify-between items-center mb-8 no-print">
+    <div>
+        <h2 class="font-headline-md text-headline-md text-on-surface">Analysis Report</h2>
+        <p class="text-on-surface-variant">Review and download your official admission strategy.</p>
+    </div>
+    <div class="flex gap-4">
+        <button class="flex items-center gap-2 px-6 py-2.5 bg-white border border-outline-variant text-primary font-bold rounded-2xl hover:bg-surface-container-high transition-all" onclick="window.print()">
+            <span class="material-symbols-outlined text-[20px]">download</span>
+            Export PDF
+        </button>
+        <a href="{% url 'recommend' %}" class="flex items-center gap-2 px-6 py-2.5 bg-secondary text-on-secondary font-bold rounded-2xl hover:opacity-90 transition-all">
+            <span class="material-symbols-outlined text-[20px]">lightbulb</span>
+            View Strategy
+        </a>
+    </div>
+</div>
+
+<!-- The "Paper" Report -->
+<div class="paper-container bg-white border border-outline-variant paper-shadow min-h-[1414px] p-12 relative overflow-hidden flex flex-col">
+    <!-- Watermark Background -->
+    <div class="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none">
+        <span class="font-display-lg text-[180px] -rotate-45 font-bold uppercase tracking-tighter">INTELLICOUNSEL</span>
+    </div>
+    
+    <!-- 1. Header -->
+    <header class="flex justify-between items-start border-b-2 border-primary pb-8 mb-10 relative z-10">
+        <div class="flex flex-col">
+            <div class="flex items-center gap-5 mb-2">
+                <div class="w-10 h-10 bg-primary flex items-center justify-center rounded-2xl">
+                    <span class="material-symbols-outlined text-white text-[28px]">insights</span>
+                </div>
+                <h1 class="font-display-lg text-[28px] font-extrabold text-primary tracking-tight">IntelliCounsel AI</h1>
+            </div>
+            <p class="font-label-mono text-secondary text-[15px] font-bold tracking-[0.2em] uppercase">Official Admission Forecast</p>
+        </div>
+        <div class="text-right">
+            <div class="bg-surface-container-high px-6 py-2 rounded-2xl mb-2">
+                <span class="font-label-mono text-[15px] text-on-surface-variant">REPORT ID:</span>
+                <span class="font-label-mono text-[15px] font-bold text-primary ml-2">{{ report_id }}</span>
+            </div>
+            <p class="font-label-mono text-[15px] text-on-surface-variant uppercase">Issued: {{ report_date }} | {{ report_time }}</p>
+        </div>
+    </header>
+
+    <!-- 2. Student Profile -->
+    <section class="grid grid-cols-3 gap-gutter mb-12 relative z-10">
+        <div class="col-span-2">
+            <h3 class="font-label-mono text-[15px] font-bold text-secondary uppercase tracking-widest mb-6 border-l-4 border-secondary pl-3">Candidate Profile</h3>
+            <div class="grid grid-cols-2 gap-8 bg-surface-container-low p-8 rounded-2xl border border-outline-variant">
+                <div>
+                    <p class="font-label-mono text-[10px] text-on-surface-variant uppercase">AIR Rank</p>
+                    <p class="font-stat-lg text-stat-lg text-secondary">{{ rank }}</p>
+                </div>
+                <div>
+                    <p class="font-label-mono text-[10px] text-on-surface-variant uppercase">Category</p>
+                    <p class="font-headline-md text-[20px] font-bold text-primary">{{ category }}</p>
+                </div>
+                <div>
+                    <p class="font-label-mono text-[10px] text-on-surface-variant uppercase">Seat Pool</p>
+                    <p class="font-headline-md text-[20px] font-bold text-primary">{{ gender }}</p>
+                </div>
+                <div>
+                    <p class="font-label-mono text-[10px] text-on-surface-variant uppercase">Data Year</p>
+                    <p class="font-headline-md text-[20px] font-bold text-primary">{{ latest_year }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-span-1 flex flex-col justify-end">
+            <div class="bg-white border-2 border-primary-container p-8 flex flex-col items-center justify-center text-center">
+                <div class="w-24 h-24 mb-3">
+                    <svg class="w-full h-full text-secondary" viewBox="0 0 36 36">
+                        <path class="stroke-surface-container-high fill-none stroke-[3]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="100, 100"></path>
+                        <path class="stroke-current fill-none stroke-[3]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="{{ agg_match }}, 100"></path>
+                        <text class="font-bold text-[8px] text-center fill-current" text-anchor="middle" x="18" y="20.35">{{ agg_match }}%</text>
+                    </svg>
+                </div>
+                <p class="font-label-mono text-[10px] font-bold uppercase text-primary">Aggregate Match</p>
+                <p class="text-[15px] text-on-surface-variant mt-1 leading-tight">
+                    {% if agg_match >= 75 %}Your rank is highly competitive for your preferences.
+                    {% elif agg_match >= 40 %}You have moderate chances across your top picks.
+                    {% else %}Consider broadening your program preferences.{% endif %}
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. Top Recommendations -->
+    {% if top_picks %}
+    <section class="mb-12 relative z-10">
+        <h3 class="font-label-mono text-[15px] font-bold text-secondary uppercase tracking-widest mb-6 border-l-4 border-secondary pl-3">Top Institution Recommendations</h3>
+        <div class="overflow-hidden border border-outline-variant rounded-2xl">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-primary text-on-primary">
+                        <th class="font-label-mono text-[15px] py-4 px-6 uppercase">Institute & Program</th>
+                        <th class="font-label-mono text-[15px] py-4 px-6 uppercase text-center">Previous Cutoff</th>
+                        <th class="font-label-mono text-[15px] py-4 px-6 uppercase text-right">Admissions Probability</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant">
+                    {% for pick in top_picks %}
+                    <tr class="{% if forloop.counter|divisibleby:2 %}bg-surface-container-lowest{% else %}bg-white{% endif %} hover:bg-surface-container transition-colors">
+                        <td class="py-5 px-6">
+                            <div>
+                                <p class="font-bold text-primary">{{ pick.college }}</p>
+                                <p class="text-[15px] text-on-surface-variant">{{ pick.branch }}</p>
+                            </div>
+                        </td>
+                        <td class="py-5 px-6 text-center font-label-mono text-[15px]">{{ pick.closing_rank }}</td>
+                        <td class="py-5 px-6 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <span class="font-bold text-{{ pick.color }} text-[18px]">{{ pick.prob }}%</span>
+                                <div class="w-16 h-2 bg-surface-container-high rounded-full overflow-hidden">
+                                    <div class="h-full bg-{{ pick.color }}" style="width: {{ pick.prob }}%"></div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- 4. Strategic Advice -->
+    <section class="mb-auto relative z-10">
+        <h3 class="font-label-mono text-[15px] font-bold text-secondary uppercase tracking-widest mb-6 border-l-4 border-secondary pl-3">Strategic Action Plan (Rounds 1–5)</h3>
+        <div class="grid grid-cols-1 gap-4">
+            {% for action in action_plan %}
+            <div class="flex gap-8 p-8 border border-outline-variant bg-surface-container-low rounded-2xl">
+                <div class="text-secondary font-display-lg text-[40px] opacity-20 font-black">0{{ forloop.counter }}</div>
+                <div>
+                    <p class="font-bold text-primary mb-1">{{ action.title }}</p>
+                    <p class="text-[15px] text-on-surface-variant leading-relaxed">{{ action.description }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- 5. Footer -->
+    <footer class="mt-16 pt-8 border-t border-outline-variant relative z-10">
+        <div class="flex justify-between items-end">
+            <div class="max-w-[60%]">
+                <p class="font-label-mono text-[10px] text-on-surface-variant uppercase mb-2">Legal Disclaimer</p>
+                <p class="text-[9px] text-outline leading-tight italic">This report is generated by the IntelliCounsel AI analytical engine based on historical data trends and real-time counseling patterns. Admission is subject to official counseling board regulations and physical verification. IntelliCounsel AI does not guarantee final seat allocation.</p>
+            </div>
+            <div class="flex flex-col items-end">
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="text-right">
+                        <p class="font-label-mono text-[10px] font-bold text-primary">VALIDATED BY AI</p>
+                        <p class="text-[9px] text-on-surface-variant">{{ report_id }}</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full border-2 border-dashed border-secondary flex items-center justify-center">
+                        <span class="material-symbols-outlined text-secondary text-[24px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                    </div>
+                </div>
+                <p class="font-label-mono text-[10px] text-on-surface-variant">© 2026 IntelliCounsel AI. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bottom Accent -->
+    <div class="absolute bottom-0 left-0 w-full h-1.5 flex">
+        <div class="h-full flex-1 bg-primary"></div>
+        <div class="h-full flex-1 bg-secondary"></div>
+        <div class="h-full flex-1 bg-secondary-container"></div>
+    </div>
+</div>
+{% endblock %}

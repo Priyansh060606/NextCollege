@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Login | IntelliCounsel AI</title>
+    <!-- Material Symbols Outlined -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+    <!-- Design System Theme Configuration -->
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#e0e3e5",
+                        "tertiary-container": "#474a4c",
+                        "surface-tint": "#2c4de1",
+                        "inverse-primary": "#bac3ff",
+                        "surface-container-highest": "#d8e3fb",
+                        "on-tertiary-container": "#b7b9bb",
+                        "on-primary-container": "#a8b5ff",
+                        "on-background": "#111c2d",
+                        "primary-fixed": "#dee1ff",
+                        "outline-variant": "#c4c5d8",
+                        "background": "#f9f9ff",
+                        "on-primary-fixed-variant": "#0031c5",
+                        "inverse-on-surface": "#ecf1ff",
+                        "surface-variant": "#d8e3fb",
+                        "tertiary": "#303435",
+                        "secondary-fixed": "#efdbff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "primary-fixed-dim": "#bac3ff",
+                        "on-primary": "#ffffff",
+                        "secondary-container": "#9c42f4",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#e7eeff",
+                        "primary-container": "#0033cc",
+                        "primary": "#002294",
+                        "on-secondary-fixed": "#2c0051",
+                        "surface-bright": "#f9f9ff",
+                        "on-surface-variant": "#444655",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed-dim": "#dcb8ff",
+                        "error": "#ba1a1a",
+                        "secondary": "#821dda",
+                        "inverse-surface": "#263143",
+                        "surface-dim": "#cfdaf2",
+                        "surface": "#f9f9ff",
+                        "on-secondary-fixed-variant": "#6700b5",
+                        "surface-container-low": "#f0f3ff",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-surface": "#111c2d",
+                        "surface-container-high": "#dee8ff",
+                        "outline": "#747687",
+                        "on-primary-fixed": "#001159",
+                        "on-secondary-container": "#fffbff",
+                        "on-tertiary-fixed-variant": "#444749"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "margin-mobile": "16px",
+                        "stack-lg": "48px",
+                        "margin-desktop": "40px",
+                        "container-max": "1280px",
+                        "base": "8px",
+                        "stack-xs": "4px",
+                        "stack-sm": "12px",
+                        "stack-md": "24px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "display-lg-mobile": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-sm": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-md": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "display-lg-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        .ai-gradient-btn {
+            background: linear-gradient(135deg, #821dda 0%, #002294 100%);
+        }
+        .ai-gradient-btn:hover {
+            filter: brightness(1.1);
+        }
+        .ai-border-glow {
+            border: 1px solid #E2E8F0;
+            transition: border-color 0.3s ease;
+        }
+        .ai-border-glow:focus-within {
+            border-color: #002294;
+            box-shadow: 0 0 0 2px rgba(0, 34, 148, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col">
+
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-inverse-surface shadow-sm sticky top-0 z-50">
+    <nav class="flex justify-between items-center px-margin-desktop py-4 w-full max-w-container-max mx-auto">
+        <div class="flex items-center gap-base">
+            <a href="{% url 'home' %}" class="font-headline-md text-headline-md font-bold text-primary dark:text-inverse-primary hover:opacity-80 transition-opacity">IntelliCounsel AI</a>
+        </div>
+        <div class="hidden md:flex items-center gap-stack-md">
+            <a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors" href="{% url 'home' %}">Home</a>
+            <a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors" href="{% url 'college_list' %}">Institutes</a>
+            <a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors" href="{% url 'predict' %}">Predictor</a>
+            <a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors" href="{% url 'analytics' %}">Analytics</a>
+            <a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors" href="{% url 'roi_analysis' %}">ROI Analysis</a>
+            <a class="font-body-md text-body-md text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1" href="{% url 'chat' %}">
+                <span class="material-symbols-outlined text-[16px]">smart_toy</span> AI Counselor
+            </a>
+        </div>
+        <div class="flex items-center gap-stack-sm">
+            <a class="text-primary dark:text-inverse-primary font-bold font-body-md text-body-md px-6 py-2" href="{% url 'login' %}">Sign In</a>
+            <a href="{% url 'register' %}" class="ai-gradient-btn text-white px-6 py-2 rounded-lg font-bold transition-all scale-95 active:opacity-80 flex items-center">Get Started</a>
+        </div>
+    </nav>
+</header>
+
+<!-- Main Content: Login Area -->
+<main class="flex-grow flex items-center justify-center py-stack-lg px-margin-mobile relative overflow-hidden bg-surface-container-low">
+    <!-- Subtle Ambient Background Pattern -->
+    <div class="absolute inset-0 z-0 opacity-40 pointer-events-none"></div>
+    <div class="relative z-10 w-full max-w-[440px]">
+        <!-- Login Card -->
+        <div class="bg-surface-container-lowest p-8 md:p-10 rounded-lg shadow-sm border border-outline-variant transition-all">
+            <div class="flex flex-col items-center text-center mb-8">
+                <div class="mb-6 bg-primary-container p-3 rounded-xl">
+                    <span class="material-symbols-outlined text-on-primary-container text-[32px]">balance</span>
+                </div>
+                <h1 class="font-headline-sm text-headline-sm text-on-surface mb-2">Welcome back</h1>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Elevate your admission journey with AI precision.</p>
+            </div>
+            
+            <!-- Google Login Button -->
+            <button class="w-full flex items-center justify-center gap-5 py-4 px-6 border border-outline-variant rounded-lg font-label-md text-label-md text-on-surface hover:bg-surface-container-high transition-all active:scale-95 mb-6">
+                <svg class="w-5 h-5" viewBox="0 0 24 24">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"></path>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+                </svg>
+                Continue with Google
+            </button>
+            
+            <!-- Divider -->
+            <div class="relative flex items-center justify-center mb-6">
+                <div class="flex-grow border-t border-outline-variant"></div>
+                <span class="mx-4 font-label-sm text-label-sm text-outline px-2 bg-surface-container-lowest">Or continue with email</span>
+                <div class="flex-grow border-t border-outline-variant"></div>
+            </div>
+            
+            <!-- Form -->
+            <form action="{% url 'login' %}" class="space-y-stack-md" method="POST">
+                {% csrf_token %}
+                <div class="space-y-stack-xs">
+                    <label class="block font-label-md text-label-md text-on-surface" for="email">Email Address</label>
+                    <div class="ai-border-glow rounded-lg overflow-hidden flex items-center bg-white">
+                        <span class="material-symbols-outlined ml-3 text-outline text-[20px]">mail</span>
+                        <input class="w-full border-none focus:ring-0 py-4 px-3 text-body-md bg-transparent" id="email" name="email" placeholder="name@example.com" required="" type="email"/>
+                    </div>
+                </div>
+                <div class="space-y-stack-xs">
+                    <div class="flex justify-between items-center">
+                        <label class="block font-label-md text-label-md text-on-surface" for="password">Password</label>
+                        <a class="font-label-sm text-label-sm text-primary hover:underline" href="#">Forgot password?</a>
+                    </div>
+                    <div class="ai-border-glow rounded-lg overflow-hidden flex items-center bg-white">
+                        <span class="material-symbols-outlined ml-3 text-outline text-[20px]">lock</span>
+                        <input class="w-full border-none focus:ring-0 py-4 px-3 text-body-md bg-transparent" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+                        <button class="pr-3 text-outline hover:text-primary transition-colors" type="button" aria-label="Toggle password visibility">
+                            <span class="material-symbols-outlined text-[20px]">visibility</span>
+                        </button>
+                    </div>
+                </div>
+                <button class="w-full ai-gradient-btn text-white py-3.5 rounded-lg font-bold text-body-md transition-all active:scale-[0.98] shadow-md" type="submit">
+                    Sign In
+                </button>
+            </form>
+            <div class="mt-8 text-center">
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                    Don't have an account? 
+                    <a class="text-primary font-bold hover:underline" href="{% url 'register' %}">Sign Up</a>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Trust Badge / Secondary CTA -->
+        <div class="mt-8 flex items-center justify-center gap-8 opacity-70">
+            <div class="flex items-center gap-1">
+                <span class="material-symbols-outlined text-[16px] text-primary">verified_user</span>
+                <span class="text-[15px] font-medium text-on-surface-variant">Data Privacy</span>
+            </div>
+            <div class="w-1 h-1 rounded-full bg-outline-variant"></div>
+            <div class="flex items-center gap-1">
+                <span class="material-symbols-outlined text-[16px] text-primary">security</span>
+                <span class="text-[15px] font-medium text-on-surface-variant">Secure Login</span>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-tertiary dark:bg-on-tertiary-fixed text-on-tertiary">
+    <div class="flex flex-col md:flex-row justify-between items-center px-margin-desktop py-stack-md w-full max-w-container-max mx-auto gap-4">
+        <div class="flex flex-col items-center md:items-start gap-2">
+            <span class="font-headline-sm text-headline-sm text-on-tertiary">IntelliCounsel AI</span>
+            <p class="font-body-sm text-body-sm opacity-80 text-tertiary-fixed-dim">© 2026 IntelliCounsel AI. All rights reserved.</p>
+        </div>
+        <div class="flex flex-wrap justify-center gap-stack-md">
+            <a class="font-body-sm text-body-sm text-tertiary-fixed-dim hover:text-white transition-colors" href="#">Privacy Policy</a>
+            <a class="font-body-sm text-body-sm text-tertiary-fixed-dim hover:text-white transition-colors" href="#">Terms of Service</a>
+            <a class="font-body-sm text-body-sm text-tertiary-fixed-dim hover:text-white transition-colors" href="#">Cookie Policy</a>
+            <a class="font-body-sm text-body-sm text-tertiary-fixed-dim hover:text-white transition-colors" href="#">Contact Support</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Micro-interactions
+    document.addEventListener('DOMContentLoaded', () => {
+        const loginCard = document.querySelector('.bg-surface-container-lowest');
+        
+        // Subtle mouse move effect on the card
+        if(loginCard) {
+            document.addEventListener('mousemove', (e) => {
+                const { clientX, clientY } = e;
+                const { left, top, width, height } = loginCard.getBoundingClientRect();
+                
+                // Only apply if mouse is within card bounds + margin
+                if (clientX >= left - 100 && clientX <= left + width + 100 &&
+                    clientY >= top - 100 && clientY <= top + height + 100) {
+                    
+                    const centerX = left + width / 2;
+                    const centerY = top + height / 2;
+                    
+                    const deltaX = (clientX - centerX) / 50;
+                    const deltaY = (clientY - centerY) / 50;
+                    
+                    // Limited tilt
+                    loginCard.style.transform = `perspective(1000px) rotateX(${-deltaY}deg) rotateY(${deltaX}deg)`;
+                } else {
+                    loginCard.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
+                }
+            });
+        }
+
+        // Password visibility toggle
+        const togglePass = document.querySelector('button[type="button"]');
+        const passInput = document.getElementById('password');
+        if (togglePass && passInput) {
+            togglePass.addEventListener('click', () => {
+                const isPass = passInput.type === 'password';
+                passInput.type = isPass ? 'text' : 'password';
+                togglePass.querySelector('span').innerText = isPass ? 'visibility_off' : 'visibility';
+            });
+        }
+    });
+</script>
+</body>
+</html>

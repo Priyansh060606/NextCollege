@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}ROI Analysis - IntelliCounsel AI{% endblock %}
+
+{% block content %}
+<div class="mb-10 mt-4 relative">
+    <div class="absolute inset-0 bg-gradient-to-r from-secondary/10 to-primary/10 rounded-2xl blur-2xl z-0 pointer-events-none"></div>
+    
+    <div class="relative z-10 glass-card rounded-2xl overflow-hidden ai-glow border border-outline-variant/30">
+        <div class="p-8 flex flex-col md:flex-row justify-between md:items-center bg-white/50 backdrop-blur-md">
+            <div>
+                <h4 class="font-display-lg text-[32px] font-extrabold text-on-surface mb-2 tracking-tight">
+                    <span class="material-symbols-outlined text-secondary align-middle mr-2">monitoring</span>
+                    <span class="ai-gradient-text">ROI Analysis</span>
+                </h4>
+                <p class="font-body-base text-on-surface-variant">Compare fees, average packages, and industry reputation to make a financially sound decision.</p>
+            </div>
+            <div class="mt-4 md:mt-0 flex gap-4">
+                <div class="bg-white/80 rounded-xl px-6 py-3 shadow-sm border border-outline-variant/30 text-center">
+                    <div class="text-[12px] text-on-surface-variant font-label-mono uppercase tracking-widest mb-1">Top Package</div>
+                    <div class="font-bold text-secondary text-lg">28.0 LPA</div>
+                </div>
+                <div class="bg-white/80 rounded-xl px-6 py-3 shadow-sm border border-outline-variant/30 text-center">
+                    <div class="text-[12px] text-on-surface-variant font-label-mono uppercase tracking-widest mb-1">Avg Fees</div>
+                    <div class="font-bold text-primary text-lg">₹8.5L</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ROI Leaderboard -->
+<div class="glass-card shadow-sm rounded-2xl border border-outline-variant/50 overflow-hidden mb-12">
+    <div class="bg-surface-container-low px-8 py-5 border-b border-outline-variant/50 flex justify-between items-center">
+        <h3 class="font-headline-sm text-[20px] font-bold text-on-surface flex items-center gap-2">
+            <span class="material-symbols-outlined text-tertiary-container">payments</span> Return on Investment Leaderboard
+        </h3>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-surface-container-lowest border-b border-outline-variant/30">
+                    <th class="p-5 font-label-mono text-sm text-on-surface-variant font-bold uppercase tracking-widest">Rank</th>
+                    <th class="p-5 font-label-mono text-sm text-on-surface-variant font-bold uppercase tracking-widest">Institute</th>
+                    <th class="p-5 font-label-mono text-sm text-on-surface-variant font-bold uppercase tracking-widest">Est. Course Fees</th>
+                    <th class="p-5 font-label-mono text-sm text-on-surface-variant font-bold uppercase tracking-widest">Avg Package (LPA)</th>
+                    <th class="p-5 font-label-mono text-sm text-on-surface-variant font-bold uppercase tracking-widest">ROI Score</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/20">
+                {% for item in roi_data %}
+                <tr class="hover:bg-primary/5 transition-colors group">
+                    <td class="p-5">
+                        <span class="w-8 h-8 rounded-full {% if forloop.counter <= 3 %}bg-secondary text-white shadow-md{% else %}bg-surface-container text-on-surface-variant{% endif %} flex items-center justify-center font-bold text-sm">
+                            {{ forloop.counter }}
+                        </span>
+                    </td>
+                    <td class="p-5">
+                        <p class="font-bold text-on-surface text-[15px] group-hover:text-primary transition-colors">{{ item.college.name }}</p>
+                        <p class="text-sm text-on-surface-variant">{{ item.college.state }}</p>
+                    </td>
+                    <td class="p-5 font-mono font-medium text-on-surface">
+                        ₹{{ item.college.average_fees|floatformat:"0" }}
+                    </td>
+                    <td class="p-5">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-primary">{{ item.college.average_package }}</span>
+                            <div class="w-24 h-1.5 bg-surface-container rounded-full overflow-hidden">
+                                <div class="h-full bg-primary rounded-full" style="width: {{ item.college.average_package|add:"0"|default:0 }}%;"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-5">
+                        <span class="inline-flex items-center gap-1 bg-tertiary-container/10 text-tertiary-container font-bold px-3 py-1 rounded-lg text-sm border border-tertiary-container/20">
+                            {{ item.roi_score }}x <span class="material-symbols-outlined text-[14px]">trending_up</span>
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="p-10 text-center text-on-surface-variant">
+                        <span class="material-symbols-outlined text-[48px] opacity-20 mb-3 block">money_off</span>
+                        <p>No ROI data available yet.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

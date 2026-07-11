@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}IntelliCounsel AI - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="mt-8 mb-10 text-center">
+    <h2 class="font-display-lg text-[32px] font-bold text-primary mb-2">Admin Dashboard</h2>
+    <p class="font-label-mono text-sm text-on-surface-variant uppercase tracking-widest">Manage Datasets, ETL Jobs, and Models</p>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-12 text-center">
+    <div class="bg-surface-container-lowest shadow-sm border border-outline-variant rounded-xl p-6">
+        <h6 class="font-label-mono text-xs text-on-surface-variant uppercase font-bold tracking-widest mb-3">Total Colleges</h6>
+        <h2 class="font-headline-md text-[36px] font-black text-primary">763</h2>
+    </div>
+    <div class="bg-surface-container-lowest shadow-sm border border-outline-variant rounded-xl p-6">
+        <h6 class="font-label-mono text-xs text-on-surface-variant uppercase font-bold tracking-widest mb-3">Students</h6>
+        <h2 class="font-headline-md text-[36px] font-black text-primary">1523</h2>
+    </div>
+    <div class="bg-surface-container-lowest shadow-sm border border-outline-variant rounded-xl p-6">
+        <h6 class="font-label-mono text-xs text-on-surface-variant uppercase font-bold tracking-widest mb-3">PDF Uploaded</h6>
+        <h2 class="font-headline-md text-[36px] font-black text-primary">84</h2>
+    </div>
+    <div class="bg-surface-container-lowest shadow-sm border border-outline-variant rounded-xl p-6">
+        <h6 class="font-label-mono text-xs text-on-surface-variant uppercase font-bold tracking-widest mb-3">Predictions</h6>
+        <h2 class="font-headline-md text-[36px] font-black text-primary">25481</h2>
+    </div>
+</div>
+
+<div class="flex justify-center mb-12">
+    <div class="w-full max-w-4xl">
+        <div class="bg-surface-container-lowest shadow-sm border border-outline-variant rounded-xl overflow-hidden">
+            <div class="p-8 border-b border-outline-variant bg-surface-container-low text-center">
+                <h5 class="font-headline-md text-xl font-bold text-primary">Actions</h5>
+            </div>
+            <div class="p-8 flex flex-wrap justify-center gap-4">
+                <button class="border-2 border-primary text-primary font-bold py-4 px-8 rounded-full hover:bg-primary hover:text-white transition-colors">Upload Dataset</button>
+                <button class="border-2 border-primary text-primary font-bold py-4 px-8 rounded-full hover:bg-primary hover:text-white transition-colors">Import CSV</button>
+                <button class="border-2 border-primary text-primary font-bold py-4 px-8 rounded-full hover:bg-primary hover:text-white transition-colors">Run Parser</button>
+                <button class="border-2 border-primary text-primary font-bold py-4 px-8 rounded-full hover:bg-primary hover:text-white transition-colors">Train ML</button>
+                <button class="border-2 border-outline text-on-surface-variant font-bold py-4 px-8 rounded-full hover:bg-surface-container-high transition-colors">View Logs</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

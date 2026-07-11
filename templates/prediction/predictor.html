@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block title %}College Predictor — IntelliCounsel AI{% endblock %}
+
+{% block extra_head %}
+<style>
+    .ai-gradient-border {
+        border: 2px solid transparent;
+        background-image: linear-gradient(white, white), linear-gradient(to bottom right, #821dda, #0033cc);
+        background-origin: border-box;
+        background-clip: padding-box, border-box;
+    }
+    .ai-glow-hover:hover {
+        box-shadow: 0 0 20px rgba(130, 29, 218, 0.15);
+    }
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        height: 18px;
+        width: 18px;
+        border-radius: 50%;
+        background: #821dda;
+        cursor: pointer;
+        border: 2px solid white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <!-- Left Column: Prediction Form -->
+    <div class="lg:col-span-8">
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm p-8">
+            <div class="mb-8">
+                <h3 class="font-headline-sm text-primary mb-2 text-2xl font-bold">Admission Predictor</h3>
+                <p class="text-on-surface-variant font-body-md">Fill in your exam details to see the list of colleges you are most likely to get admitted into.</p>
+            </div>
+            
+            <form action="{% url 'result' %}" method="POST" class="space-y-8">
+                {% csrf_token %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="font-label-md text-on-surface ml-1 font-semibold">Rank / Score *</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">trending_up</span>
+                            <input name="rank" required class="w-full pl-10 pr-4 py-4 bg-surface-bright border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none" placeholder="Enter your rank" type="number"/>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="font-label-md text-on-surface ml-1 font-semibold">Category *</label>
+                        <select name="category" class="w-full px-6 py-4 bg-surface-bright border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none appearance-none">
+                            {% for cat in categories %}
+                            <option value="{{ cat }}">{{ cat }}</option>
+                            {% empty %}
+                            <option value="OPEN">OPEN</option>
+                            <option value="OBC-NCL">OBC-NCL</option>
+                            <option value="SC">SC</option>
+                            <option value="ST">ST</option>
+                            <option value="EWS">EWS</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="font-label-md text-on-surface ml-1 font-semibold">Seat Pool (Gender)</label>
+                        <select name="gender" class="w-full px-6 py-4 bg-surface-bright border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none appearance-none">
+                            {% for pool in seat_pools %}
+                            <option value="{{ pool }}">{{ pool }}</option>
+                            {% empty %}
+                            <option value="Gender-Neutral">Gender-Neutral</option>
+                            <option value="Female-only (including Supernumerary)">Female Only</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="font-label-md text-on-surface ml-1 font-semibold">Home State</label>
+                        <input type="text" name="state" placeholder="e.g. Maharashtra" class="w-full px-6 py-4 bg-surface-bright border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none" />
+                    </div>
+                    <div class="space-y-2 md:col-span-2">
+                        <label class="font-label-md text-on-surface ml-1 font-semibold">Preferred Branch (Optional)</label>
+                        <input type="text" name="branch" placeholder="e.g. Computer Science" class="w-full px-6 py-4 bg-surface-bright border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none" />
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <label class="font-label-md text-on-surface ml-1 font-semibold">Maximum Annual Budget</label>
+                        <span class="text-secondary font-bold" id="budget-value">$15,000</span>
+                    </div>
+                    <input class="w-full h-2 bg-surface-container rounded-lg appearance-none cursor-pointer accent-secondary" max="100000" min="5000" oninput="document.getElementById('budget-value').innerText = '$' + Number(this.value).toLocaleString()" step="1000" type="range" value="15000"/>
+                    <div class="flex justify-between text-xs text-on-surface-variant px-1">
+                        <span>$5,000</span>
+                        <span>$100,000+</span>
+                    </div>
+                </div>
+                
+                <div class="pt-4">
+                    <button type="submit" class="w-full py-4 bg-gradient-to-r from-primary to-secondary text-white font-bold text-lg rounded-xl shadow-lg hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-5 submit-btn">
+                        <span class="material-symbols-outlined">auto_awesome</span>
+                        Predict My Colleges
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Recent Searches / History -->
+        <div class="mt-8">
+            <h4 class="font-label-md text-on-surface-variant mb-6 uppercase tracking-wider font-semibold">Historical Comparison</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-surface-container p-8 rounded-xl border border-outline-variant group cursor-pointer hover:bg-surface-container-high transition-all">
+                    <p class="text-xs text-on-surface-variant mb-1">Rank 1,200 (CS)</p>
+                    <p class="font-bold text-primary">85% Accuracy</p>
+                </div>
+                <div class="bg-surface-container p-8 rounded-xl border border-outline-variant group cursor-pointer hover:bg-surface-container-high transition-all">
+                    <p class="text-xs text-on-surface-variant mb-1">Rank 4,500 (ECE)</p>
+                    <p class="font-bold text-primary">92% Accuracy</p>
+                </div>
+                <div class="bg-surface-container p-8 rounded-xl border border-outline-variant group cursor-pointer hover:bg-surface-container-high transition-all">
+                    <p class="text-xs text-on-surface-variant mb-1">Rank 8,900 (ME)</p>
+                    <p class="font-bold text-primary">78% Accuracy</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column: AI Insights Sidebar -->
+    <div class="lg:col-span-4 space-y-6">
+        <div class="ai-gradient-border p-8 rounded-2xl bg-surface-container-lowest shadow-md">
+            <div class="flex items-center gap-5 mb-4">
+                <div class="w-10 h-10 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">psychology</span>
+                </div>
+                <h4 class="font-headline-sm text-lg text-on-surface font-bold">AI Insights</h4>
+            </div>
+            <div class="space-y-4">
+                <div class="p-8 bg-surface-container-low rounded-lg border-l-4 border-secondary">
+                    <p class="text-sm leading-relaxed text-on-surface">Our model analyzes <span class="font-bold">10+ years</span> of historical cutoff data combined with current year difficulty trends.</p>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+                        <p class="text-xs text-on-surface-variant">Real-time data from 500+ top institutions.</p>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+                        <p class="text-xs text-on-surface-variant">Statistical variance adjustments for seating changes.</p>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
+                        <p class="text-xs text-on-surface-variant">Preference mapping based on branch popularity.</p>
+                    </div>
+                </div>
+                <hr class="border-outline-variant"/>
+                <div class="pt-2">
+                    <p class="text-xs font-bold text-secondary uppercase mb-2">Pro Tip</p>
+                    <p class="text-sm text-on-surface-variant">Entering your Home State gives you access to quota-based predictions, which typically have <span class="text-secondary font-bold">15% lower cutoffs</span>.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Visualization Card -->
+        <div class="bg-surface-container-highest/30 border border-outline-variant rounded-2xl p-8 relative overflow-hidden group">
+            <div class="absolute -right-10 -bottom-10 opacity-10 group-hover:scale-110 transition-transform duration-700">
+                <span class="material-symbols-outlined text-9xl">analytics</span>
+            </div>
+            <h5 class="font-label-md text-on-surface mb-6 font-semibold">Market Trend</h5>
+            <div class="h-32 flex items-end gap-2 mb-4">
+                <div class="flex-1 bg-primary rounded-t h-[40%]"></div>
+                <div class="flex-1 bg-secondary rounded-t h-[65%]"></div>
+                <div class="flex-1 bg-primary rounded-t h-[50%]"></div>
+                <div class="flex-1 bg-secondary rounded-t h-[85%]"></div>
+                <div class="flex-1 bg-primary rounded-t h-[60%]"></div>
+                <div class="flex-1 bg-secondary rounded-t h-[95%]"></div>
+            </div>
+            <p class="text-xs text-on-surface-variant leading-tight">Branch popularity for CSE has increased by <span class="font-bold text-green-600">12.4%</span> this year.</p>
+        </div>
+        
+        <!-- Support Card -->
+        <div class="bg-inverse-surface text-inverse-on-surface p-8 rounded-2xl">
+            <h5 class="font-label-md mb-2 font-semibold">Need Help?</h5>
+            <p class="text-sm opacity-80 mb-4">Chat with an expert advisor to verify your AI prediction.</p>
+            <button class="flex items-center gap-2 text-secondary-fixed-dim font-bold text-sm hover:underline">
+                Talk to an Advisor
+                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Simple micro-interaction for the predict button
+    const predictBtn = document.querySelector('.submit-btn');
+    if (predictBtn) {
+        predictBtn.addEventListener('mousedown', () => {
+            predictBtn.style.transform = 'scale(0.96)';
+        });
+        predictBtn.addEventListener('mouseup', () => {
+            predictBtn.style.transform = 'scale(1)';
+        });
+        predictBtn.addEventListener('mouseleave', () => {
+            predictBtn.style.transform = 'scale(1)';
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,417 @@
+{% load static %}
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>IntelliCounsel AI | Engineering Admissions Revolutionized</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#263143",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "primary": "#002294",
+                        "primary-container": "#0033cc",
+                        "primary-fixed": "#dee1ff",
+                        "surface": "#f9f9ff",
+                        "surface-dim": "#cfdaf2",
+                        "secondary-fixed-dim": "#dcb8ff",
+                        "inverse-primary": "#bac3ff",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "surface-variant": "#d8e3fb",
+                        "on-tertiary-container": "#b7b9bb",
+                        "background": "#f9f9ff",
+                        "outline-variant": "#c4c5d8",
+                        "error": "#ba1a1a",
+                        "on-background": "#111c2d",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "secondary-container": "#9c42f4",
+                        "surface-tint": "#2c4de1",
+                        "tertiary": "#303435",
+                        "on-secondary-fixed-variant": "#6700b5",
+                        "inverse-on-surface": "#ecf1ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "primary-fixed-dim": "#bac3ff",
+                        "tertiary-fixed": "#e0e3e5",
+                        "surface-container-highest": "#d8e3fb",
+                        "surface-container-high": "#dee8ff",
+                        "secondary-fixed": "#efdbff",
+                        "on-secondary-fixed": "#2c0051",
+                        "on-primary-container": "#a8b5ff",
+                        "outline": "#747687",
+                        "surface-container-low": "#f0f3ff",
+                        "surface-bright": "#f9f9ff",
+                        "on-surface-variant": "#444655",
+                        "on-primary": "#ffffff",
+                        "tertiary-container": "#474a4c",
+                        "on-secondary-container": "#fffbff",
+                        "secondary": "#821dda",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-primary-fixed": "#001159",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#e7eeff",
+                        "on-surface": "#111c2d",
+                        "on-primary-fixed-variant": "#0031c5"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "stack-md": "24px",
+                        "gutter": "24px",
+                        "stack-sm": "12px",
+                        "stack-xs": "4px",
+                        "margin-desktop": "40px",
+                        "base": "8px",
+                        "stack-lg": "48px",
+                        "container-max": "1280px"
+                    },
+                    "fontFamily": {
+                        "display-lg-mobile": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-md": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-sm": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ai-gradient-text {
+            background: linear-gradient(135deg, #002294 0%, #821dda 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .ai-glow {
+            box-shadow: 0 0 40px -10px rgba(130, 29, 218, 0.2);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+
+        /* Global White Theme */
+        body {
+            background-color: #ffffff !important;
+            background-image: none !important;
+            color: #111c2d !important;
+        }
+        .ai-text-gradient {
+            background: linear-gradient(135deg, #002294 0%, #821dda 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        /* Override Tailwind colors for white mode globally */
+        .text-on-surface, .text-on-background { color: #111c2d !important; }
+        .text-on-surface-variant { color: #444655 !important; }
+        .bg-surface-container-high { background-color: rgba(0, 0, 0, 0.03) !important; }
+        .bg-surface, .bg-white { background-color: rgba(255, 255, 255, 0.9) !important; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+        .border-outline-variant\/50, .border-outline-variant { border-color: rgba(0, 0, 0, 0.05) !important; }
+        .glass-header {
+            background: rgba(255, 255, 255, 0.9) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+        }
+    </style>
+</head>
+<body class="bg-transparent text-on-surface font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed">
+
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 glass-header h-20 transition-all duration-200 ease-in-out">
+    <nav class="flex justify-between items-center px-margin-desktop max-w-container-max mx-auto h-full">
+        <div class="flex items-center gap-2">
+            <span class="text-headline-sm font-headline-sm font-bold text-primary">IntelliCounsel AI</span>
+        </div>
+        <div class="hidden md:flex items-center gap-8">
+            <a class="font-label-md text-label-md text-primary border-b-2 border-primary pb-1 transition-colors" href="{% url 'home' %}">Home</a>
+            <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="{% url 'college_list' %}">Colleges</a>
+            <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="{% url 'predict' %}">Predictor</a>
+            <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="{% url 'analytics' %}">Analytics</a>
+            <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="{% url 'roi_analysis' %}">ROI Analysis</a>
+            <a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1" href="{% url 'chat' %}">
+                <span class="material-symbols-outlined text-[16px]">smart_toy</span> AI Counselor
+            </a>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="{% url 'login' %}" class="hidden lg:block px-6 py-2 rounded-full font-label-md text-label-md text-primary hover:bg-primary-container/10 transition-all">Sign In</a>
+            <a href="{% url 'predict' %}" class="px-6 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:shadow-lg transition-all active:scale-95 inline-flex">Get Started</a>
+        </div>
+    </nav>
+</header>
+
+<main class="pt-20">
+    <!-- Hero Section -->
+    <section class="relative min-h-[90vh] flex items-center overflow-hidden bg-surface">
+        <div class="absolute inset-0 z-0 opacity-40"></div>
+        <div class="relative z-10 max-w-container-max mx-auto px-margin-desktop w-full py-20 flex flex-col items-center text-center">
+            <div class="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary-container/10 border border-primary/20 text-primary mb-8 animate-fade-in">
+                <span class="material-symbols-outlined text-[18px]">verified</span>
+                <span class="font-label-sm text-label-sm uppercase tracking-wider">AI-Powered Admission Strategy</span>
+            </div>
+            
+            <h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-on-background max-w-4xl leading-tight mb-6">
+                Master Your Engineering <span class="ai-gradient-text">Future with Precision AI</span> Counseling
+            </h1>
+            
+            <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mb-12">
+                Stop guessing your admission chances. Use data-driven insights from 10+ years of cutoff history to secure your seat in India's top engineering colleges.
+            </p>
+
+            <!-- Search College Integration -->
+            <form action="{% url 'college_list' %}" method="GET" class="w-full max-w-3xl glass-card rounded-2xl p-2 ai-glow flex flex-col md:flex-row gap-2 mb-12 group transition-all focus-within:ring-2 focus-within:ring-primary/30">
+                <div class="flex-grow flex items-center px-6 gap-3">
+                    <span class="material-symbols-outlined text-primary group-focus-within:scale-110 transition-transform">search</span>
+                    <input name="q" class="w-full bg-transparent border-none focus:ring-0 font-body-md text-on-surface placeholder:text-on-surface-variant/60 py-4" placeholder="Search by college name, branch, or city..." type="text"/>
+                </div>
+                <button type="submit" class="bg-primary hover:bg-primary-container text-on-primary px-8 py-4 rounded-xl font-label-md text-label-md flex items-center justify-center gap-2 transition-all active:scale-95">
+                    Search Colleges
+                </button>
+            </form>
+
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="{% url 'predict' %}" class="group flex items-center gap-2 px-8 py-4 rounded-xl bg-secondary text-on-secondary font-label-md text-label-md hover:shadow-xl hover:shadow-secondary/20 transition-all active:scale-95">
+                    View Predictor
+                    <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">trending_up</span>
+                </a>
+                <a href="{% url 'analytics' %}" class="px-8 py-4 rounded-xl bg-white border border-outline-variant text-on-surface font-label-md text-label-md hover:bg-surface-container transition-all">
+                    View Analytics
+                </a>
+            </div>
+
+            <!-- Hero Image/Dashboard Preview -->
+            <div class="mt-20 w-full max-w-5xl rounded-2xl overflow-hidden shadow-2xl border border-outline-variant/30">
+                <img class="w-full object-cover" alt="IntelliCounsel AI Dashboard Preview" src="{% static 'images/dashboard_preview.png' %}"/>
+            </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="py-20 bg-primary-container/5">
+        <div class="max-w-container-max mx-auto px-margin-desktop">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div class="p-8">
+                    <div class="text-[56px] font-black ai-gradient-text leading-none mb-2">{% if total_colleges %}{{ total_colleges }}{% else %}150+{% endif %}</div>
+                    <div class="text-label-md font-label-md uppercase text-on-surface-variant tracking-widest">Colleges Indexed</div>
+                </div>
+                <div class="p-8 border-y md:border-y-0 md:border-x border-outline-variant/30">
+                    <div class="text-[56px] font-black ai-gradient-text leading-none mb-2">{% if total_branches %}{{ total_branches }}{% else %}10k+{% endif %}</div>
+                    <div class="text-label-md font-label-md uppercase text-on-surface-variant tracking-widest">Programs Tracked</div>
+                </div>
+                <div class="p-8">
+                    <div class="text-[56px] font-black ai-gradient-text leading-none mb-2">{{ model_accuracy }}</div>
+                    <div class="text-label-md font-label-md uppercase text-on-surface-variant tracking-widest">Prediction Accuracy</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Bento Grid -->
+    <section class="py-stack-lg bg-surface">
+        <div class="max-w-container-max mx-auto px-margin-desktop">
+            <div class="text-center mb-16">
+                <h2 class="font-headline-md text-headline-md text-on-background mb-4">Powerful Tools for Your Success</h2>
+                <p class="font-body-md text-on-surface-variant max-w-2xl mx-auto">Navigate the complex engineering admission landscape with tools designed by expert counselors and AI researchers.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+                <!-- Feature Card 1: Predictor -->
+                <div class="md:col-span-8 group relative overflow-hidden rounded-2xl border border-outline-variant bg-white p-8 hover:shadow-xl transition-all duration-300">
+                    <div class="flex flex-col h-full justify-between relative z-10">
+                        <div>
+                            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+                                <span class="material-symbols-outlined">analytics</span>
+                            </div>
+                            <h3 class="text-headline-sm font-headline-sm mb-4">AI Admission Predictor</h3>
+                            <p class="text-on-surface-variant font-body-md max-w-md">Our proprietary algorithm analyzes million+ historical data points to predict your admission probability with unmatched precision.</p>
+                        </div>
+                        <a href="{% url 'predict' %}" class="mt-12 flex items-center gap-2 text-primary font-label-md cursor-pointer hover:gap-8 transition-all inline-block">
+                            Explore Predictor <span class="material-symbols-outlined">arrow_forward</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 2: ROI -->
+                <a href="{% url 'roi_analysis' %}" class="md:col-span-4 group rounded-2xl border border-outline-variant bg-white p-8 hover:shadow-xl hover:border-primary/50 transition-all duration-300 block">
+                    <div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary mb-6 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined">payments</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-headline-sm font-headline-sm">ROI Analysis</h3>
+                        <span class="material-symbols-outlined text-secondary opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward</span>
+                    </div>
+                    <p class="text-on-surface-variant font-body-sm">Compare fees, average packages, and industry reputation to make a financially sound decision.</p>
+                    <div class="mt-8 pt-8 border-t border-outline-variant/30 flex justify-center">
+                        <div class="text-center">
+                            <span class="text-headline-sm font-bold text-on-background">Live Data</span>
+                            <p class="text-label-sm text-secondary font-label-sm">View Top ROI Colleges</p>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Feature Card 3: Counseling -->
+                <div class="md:col-span-4 group rounded-2xl border border-outline-variant bg-white p-8 hover:shadow-xl transition-all duration-300">
+                    <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+                        <span class="material-symbols-outlined">person_pin</span>
+                    </div>
+                    <h3 class="text-headline-sm font-headline-sm mb-4">Strategic Counseling</h3>
+                    <p class="text-on-surface-variant font-body-sm">Personalized preference filling strategies to ensure you get the best possible branch in your target college.</p>
+                </div>
+
+                <!-- Feature Card 4: Alerts -->
+                <div class="md:col-span-8 group relative overflow-hidden rounded-2xl bg-inverse-surface p-8 hover:shadow-2xl transition-all duration-300">
+                    <div class="flex flex-col md:flex-row items-center gap-8 relative z-10">
+                        <div class="flex-grow">
+                            <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-white mb-6">
+                                <span class="material-symbols-outlined">notifications_active</span>
+                            </div>
+                            <h3 class="text-headline-sm font-headline-sm text-white mb-4">Real-time Cutoff Alerts</h3>
+                            <p class="text-surface-variant font-body-md">Never miss a deadline. Get instant push notifications when cutoffs are released or counseling rounds begin.</p>
+                            <a href="{% url 'register' %}" class="mt-6 px-6 py-2 bg-white text-primary rounded-lg font-label-md inline-block">Enable Alerts</a>
+                        </div>
+                        <div class="w-full md:w-1/3 flex justify-center">
+                            <span class="material-symbols-outlined text-[120px] text-primary-container/20">cell_tower</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-24 bg-surface">
+        <div class="max-w-container-max mx-auto px-margin-desktop">
+            <div class="relative rounded-3xl overflow-hidden bg-primary p-12 md:p-20 text-center">
+                <div class="absolute inset-0 opacity-20 pointer-events-none"></div>
+                <div class="relative z-10">
+                    <h2 class="font-display-lg text-white mb-6">Ready to secure your engineering seat?</h2>
+                    <p class="text-primary-fixed font-body-lg mb-10 max-w-xl mx-auto">Join 10,000+ students who have already simplified their admission journey with IntelliCounsel AI.</p>
+                    <div class="flex flex-wrap justify-center gap-4">
+                        <a href="{% url 'college_list' %}" class="px-10 py-5 rounded-full bg-white text-primary font-bold shadow-lg hover:scale-105 transition-transform">Start Searching Now</a>
+                        <a href="{% url 'predict' %}" class="px-10 py-5 rounded-full border-2 border-white/30 text-white font-bold hover:bg-white/10 transition-colors">Go to Predictor</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- Professional Footer -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant/50 w-full pt-16 pb-8">
+    <div class="max-w-container-max mx-auto px-margin-desktop">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+            <div class="col-span-1 md:col-span-1">
+                <span class="text-headline-sm font-headline-sm font-bold text-primary mb-6 block">IntelliCounsel AI</span>
+                <p class="text-body-sm text-on-surface-variant">The leading AI-powered counseling platform for engineering aspirants across India. We provide transparency and data-driven insights for every step of the admission process.</p>
+            </div>
+            <div>
+                <h4 class="font-label-md text-label-md text-on-background mb-6">Product</h4>
+                <ul class="space-y-4 text-body-sm text-on-surface-variant">
+                    <li><a class="hover:text-primary transition-colors" href="{% url 'predict' %}">College Predictor</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="{% url 'college_list' %}">College Directory</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="{% url 'analytics' %}">Cutoff History</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="#">Pricing Plans</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-label-md text-label-md text-on-background mb-6">Resources</h4>
+                <ul class="space-y-4 text-body-sm text-on-surface-variant">
+                    <li><a class="hover:text-primary transition-colors" href="#">Counseling Guide</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="#">State Quota Info</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="#">Exam Alerts</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="#">ROI Calculator</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-label-md text-label-md text-on-background mb-6">Contact</h4>
+                <ul class="space-y-4 text-body-sm text-on-surface-variant">
+                    <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">mail</span> support@intellicounsel.ai</li>
+                    <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">call</span> +91 (800) 123-4567</li>
+                    <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">location_on</span> Tech Hub, Bangalore</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-outline-variant/30 gap-4">
+            <p class="font-body-sm text-body-sm text-on-surface-variant">© 2026 IntelliCounsel AI. All rights reserved.</p>
+            <div class="flex gap-8">
+                <a class="text-body-sm text-on-surface-variant hover:text-primary" href="#">Privacy Policy</a>
+                <a class="text-body-sm text-on-surface-variant hover:text-primary" href="#">Terms of Service</a>
+                <a class="text-body-sm text-on-surface-variant hover:text-primary" href="#">Career Guidance</a>
+            </div>
+            <div class="flex gap-4">
+                <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant cursor-pointer hover:bg-primary hover:text-white transition-all">
+                    <span class="material-symbols-outlined">share</span>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant cursor-pointer hover:bg-primary hover:text-white transition-all">
+                    <span class="material-symbols-outlined">forum</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Smooth scroll implementation
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+
+    // Sticky header transition
+    const header = document.querySelector('header');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 20) {
+            header.classList.add('shadow-md');
+            header.style.background = 'rgba(255, 255, 255, 0.9)';
+        } else {
+            header.classList.remove('shadow-md');
+            header.style.background = 'rgba(255, 255, 255, 0.8)';
+        }
+    });
+</script>
+</body>
+</html>

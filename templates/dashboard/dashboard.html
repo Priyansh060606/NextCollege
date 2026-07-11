@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}IntelliCounsel AI - Dashboard{% endblock %}
+
+{% block content %}
+<div class="mb-10 mt-4 relative">
+    <!-- Ambient glow behind welcome banner -->
+    <div class="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl blur-2xl z-0 pointer-events-none"></div>
+    
+    <div class="relative z-10 glass-card rounded-2xl overflow-hidden ai-glow">
+        <div class="p-8 flex flex-col lg:flex-row justify-between lg:items-center bg-white/50">
+            <div class="mb-6 lg:mb-0">
+                <h4 class="font-display-lg text-[32px] font-extrabold text-on-surface mb-2 tracking-tight">Welcome back, <span class="ai-gradient-text">Priyansh</span></h4>
+                <p class="font-body-base text-on-surface-variant">Your personalized AI-driven engineering counseling overview.</p>
+            </div>
+            <div class="flex gap-8 flex-wrap">
+                <div class="bg-white/80 rounded-xl p-8 shadow-sm border border-outline-variant/30 text-center min-w-[110px] hover:-translate-y-1 transition-transform">
+                    <div class="text-[15px] text-on-surface-variant font-label-mono uppercase tracking-widest mb-1 flex items-center justify-center gap-1"><span class="material-symbols-outlined text-[15px]">military_tech</span> AIR</div>
+                    <div class="font-bold text-primary text-xl">15,432</div>
+                </div>
+                <div class="bg-white/80 rounded-xl p-8 shadow-sm border border-outline-variant/30 text-center min-w-[110px] hover:-translate-y-1 transition-transform">
+                    <div class="text-[15px] text-on-surface-variant font-label-mono uppercase tracking-widest mb-1 flex items-center justify-center gap-1"><span class="material-symbols-outlined text-[15px]">category</span> Category</div>
+                    <div class="font-bold text-primary text-xl">OPEN</div>
+                </div>
+                <div class="bg-white/80 rounded-xl p-8 shadow-sm border border-outline-variant/30 text-center min-w-[110px] hover:-translate-y-1 transition-transform">
+                    <div class="text-[15px] text-on-surface-variant font-label-mono uppercase tracking-widest mb-1 flex items-center justify-center gap-1"><span class="material-symbols-outlined text-[15px]">location_on</span> State</div>
+                    <div class="font-bold text-primary text-xl">Gujarat</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+    <div class="glass-card shadow-sm rounded-2xl h-full flex flex-col justify-center items-center text-center p-8 relative overflow-hidden group hover:-translate-y-1 transition-transform">
+        <div class="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors pointer-events-none"></div>
+        <div class="w-14 h-14 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-[28px]">stars</span>
+        </div>
+        <h5 class="font-bold text-on-surface-variant mb-2 text-sm uppercase tracking-wider">Dream Colleges</h5>
+        <h2 class="font-display-lg text-[56px] font-black text-primary leading-none">12</h2>
+    </div>
+    <div class="glass-card shadow-sm rounded-2xl h-full flex flex-col justify-center items-center text-center p-8 relative overflow-hidden group hover:-translate-y-1 transition-transform">
+        <div class="absolute inset-0 bg-secondary/5 group-hover:bg-secondary/10 transition-colors pointer-events-none"></div>
+        <div class="w-14 h-14 bg-secondary/10 text-secondary rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-[28px]">track_changes</span>
+        </div>
+        <h5 class="font-bold text-on-surface-variant mb-2 text-sm uppercase tracking-wider">Target Colleges</h5>
+        <h2 class="font-display-lg text-[56px] font-black text-secondary leading-none">28</h2>
+    </div>
+    <div class="glass-card shadow-sm rounded-2xl h-full flex flex-col justify-center items-center text-center p-8 relative overflow-hidden group hover:-translate-y-1 transition-transform">
+        <div class="absolute inset-0 bg-tertiary-container/5 group-hover:bg-tertiary-container/10 transition-colors pointer-events-none"></div>
+        <div class="w-14 h-14 bg-tertiary-container/10 text-tertiary-container rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-[28px]">verified_user</span>
+        </div>
+        <h5 class="font-bold text-on-surface-variant mb-2 text-sm uppercase tracking-wider">Safe Colleges</h5>
+        <h2 class="font-display-lg text-[56px] font-black text-tertiary-container leading-none">45</h2>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+    <div class="lg:col-span-2">
+        <div class="glass-card rounded-2xl h-full flex flex-col overflow-hidden relative group border border-outline-variant/50">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+            <div class="p-8 border-b border-white/40 bg-white/50 backdrop-blur-md flex flex-col sm:flex-row justify-between items-start sm:items-center relative z-10 gap-4">
+                <h5 class="font-headline-md text-xl font-bold text-on-surface flex items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary">memory</span> Latest Prediction
+                </h5>
+                <span class="bg-primary-container/10 text-primary border border-primary/20 px-6 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1 shadow-sm">
+                    <div class="w-2 h-2 rounded-full bg-secondary animate-pulse"></div> AI Confidence: High
+                </span>
+            </div>
+            <div class="p-12 flex-1 flex flex-col items-center justify-center text-center relative z-10 bg-white/20">
+                <p class="font-label-mono text-sm text-on-surface-variant uppercase tracking-widest mb-6 border-b border-outline-variant/30 pb-2">Admission Probability</p>
+                <h1 class="font-display-lg text-[96px] font-black ai-gradient-text leading-none mb-6 drop-shadow-sm">87%</h1>
+                <div class="inline-flex items-center gap-5 bg-white/80 px-6 py-4 rounded-full border border-white shadow-sm hover:shadow-md transition-shadow cursor-default">
+                    <div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary font-bold text-xs">SVNIT</div>
+                    <p class="font-body-base font-medium text-on-surface text-[15px]">SVNIT Surat <span class="text-on-surface-variant ml-1">(Computer Science & Engineering)</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="lg:col-span-1">
+        <div class="glass-card rounded-2xl h-full flex flex-col justify-between p-8 bg-white/50 relative overflow-hidden border border-outline-variant/50">
+            <div class="absolute bottom-0 left-0 w-full h-[60%] bg-gradient-to-t from-primary/5 to-transparent pointer-events-none"></div>
+            
+            <div class="relative z-10 mb-8">
+                <h5 class="font-headline-md text-xl font-bold text-on-surface mb-5 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">bolt</span> Quick Actions
+                </h5>
+                <p class="text-[15px] text-on-surface-variant leading-relaxed">Update your preferences, run a new prediction, or export your counseling report.</p>
+            </div>
+
+            <div class="flex flex-col gap-8 relative z-10">
+                <a href="{% url 'predict' %}" class="flex items-center justify-center gap-2 w-full ai-gradient-btn text-white font-bold py-4 rounded-xl shadow-md active:scale-95 transition-all">
+                    <span class="material-symbols-outlined text-[20px]">query_stats</span>
+                    Predict Again
+                </a>
+                <a href="{% url 'analytics' %}" class="flex items-center justify-center gap-2 w-full bg-white border border-outline-variant text-on-surface font-bold py-4 rounded-xl hover:bg-surface-container hover:border-outline-variant/80 shadow-sm transition-colors active:scale-95">
+                    <span class="material-symbols-outlined text-[20px]">leaderboard</span>
+                    View Analytics
+                </a>
+                <a href="#" class="flex items-center justify-center gap-2 w-full bg-surface/50 border border-primary/20 text-primary font-bold py-4 rounded-xl hover:bg-primary/5 hover:border-primary/40 transition-colors active:scale-95">
+                    <span class="material-symbols-outlined text-[20px]">download</span>
+                    Download Report
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

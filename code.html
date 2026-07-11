@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Admission Forecast Report - IntelliCounsel AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Geist:wght@400;500;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#191c1e",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-tertiary-container": "#009844",
+                        "tertiary": "#000000",
+                        "surface-bright": "#f7f9fb",
+                        "surface": "#f7f9fb",
+                        "on-secondary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#e0e3e5",
+                        "primary-fixed-dim": "#bec6e0",
+                        "surface-container": "#eceef0",
+                        "on-primary-fixed": "#131b2e",
+                        "secondary-container": "#2170e4",
+                        "surface-tint": "#565e74",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#fefcff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#dae2fd",
+                        "outline": "#76777d",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "error": "#ba1a1a",
+                        "surface-container-high": "#e6e8ea",
+                        "on-error": "#ffffff",
+                        "primary-container": "#131b2e",
+                        "inverse-surface": "#2d3133",
+                        "surface-dim": "#d8dadc",
+                        "primary": "#000000",
+                        "surface-container-low": "#f2f4f6",
+                        "on-surface": "#191c1e",
+                        "tertiary-fixed-dim": "#4ae176",
+                        "tertiary-container": "#002109",
+                        "on-surface-variant": "#45464d",
+                        "on-secondary-fixed-variant": "#004395",
+                        "outline-variant": "#c6c6cd",
+                        "on-error-container": "#93000a",
+                        "background": "#f7f9fb",
+                        "tertiary-fixed": "#6bff8f",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "on-primary-container": "#7c839b",
+                        "on-tertiary-fixed-variant": "#005321",
+                        "on-secondary-fixed": "#001a42",
+                        "secondary": "#0058be",
+                        "on-tertiary-fixed": "#002109",
+                        "surface-variant": "#e0e3e5",
+                        "secondary-fixed": "#d8e2ff",
+                        "inverse-primary": "#bec6e0"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-desktop": "2.5rem",
+                        "stack-sm": "0.5rem",
+                        "stack-lg": "2rem",
+                        "stack-md": "1rem",
+                        "gutter": "1.5rem",
+                        "container-max": "1280px",
+                        "margin-mobile": "1rem"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "label-mono": ["Geist"],
+                        "body-base": ["Inter"],
+                        "stat-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-mono": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "body-base": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "stat-lg": ["36px", {"lineHeight": "44px", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .paper-shadow {
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.05);
+        }
+        @media print {
+            .no-print { display: none; }
+            body { background: white; padding: 0; }
+            .paper-container { box-shadow: none; border: none; margin: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body class="bg-surface-container-low font-body-base text-on-surface antialiased min-h-screen py-10">
+<!-- Global Side Navigation (Shared Component) -->
+<aside class="fixed left-0 top-0 h-full w-[280px] bg-surface dark:bg-inverse-surface shadow-sm flex flex-col py-spacing-margin-desktop no-print">
+<div class="px-8 mb-10">
+<h1 class="font-display-lg text-[24px] font-bold text-primary dark:text-on-primary">IntelliCounsel AI</h1>
+<p class="text-on-surface-variant font-label-mono uppercase tracking-widest text-[10px] mt-1">Admissions Advisor</p>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-body-base">Home</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-body-base">Predict</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-secondary dark:text-secondary-fixed-dim font-bold border-r-4 border-secondary bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">leaderboard</span>
+<span class="font-body-base">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">school</span>
+<span class="font-body-base">Colleges</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-base">Dashboard</span>
+</a>
+</nav>
+<div class="mt-auto px-4 space-y-1">
+<button class="w-full bg-primary text-on-primary py-3 rounded-sm font-bold text-sm mb-6 hover:opacity-90 transition-opacity">
+                Upgrade to Pro
+            </button>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-base">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-body-base">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Report Container -->
+<main class="ml-[280px] px-spacing-margin-desktop max-w-[1100px] mx-auto">
+<!-- Controls -->
+<div class="flex justify-between items-center mb-8 no-print">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Analysis Report</h2>
+<p class="text-on-surface-variant">Review and download your official admission strategy.</p>
+</div>
+<div class="flex gap-4">
+<button class="flex items-center gap-2 px-6 py-2.5 bg-white border border-outline-variant text-primary font-bold rounded-sm hover:bg-surface-container-high transition-all" onclick="window.print()">
+<span class="material-symbols-outlined text-[20px]">download</span>
+                    Export PDF
+                </button>
+<button class="flex items-center gap-2 px-6 py-2.5 bg-secondary text-on-secondary font-bold rounded-sm hover:opacity-90 transition-all">
+<span class="material-symbols-outlined text-[20px]">share</span>
+                    Share Strategy
+                </button>
+</div>
+</div>
+<!-- The "Paper" Report -->
+<div class="paper-container bg-white border border-outline-variant paper-shadow min-h-[1414px] p-12 relative overflow-hidden flex flex-col">
+<!-- Watermark Background -->
+<div class="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none">
+<span class="font-display-lg text-[180px] -rotate-45 font-bold uppercase tracking-tighter">INTELLICOUNSEL</span>
+</div>
+<!-- 1. Header -->
+<header class="flex justify-between items-start border-b-2 border-primary pb-8 mb-10 relative z-10">
+<div class="flex flex-col">
+<div class="flex items-center gap-3 mb-2">
+<div class="w-10 h-10 bg-primary flex items-center justify-center rounded-sm">
+<span class="material-symbols-outlined text-white text-[28px]">insights</span>
+</div>
+<h1 class="font-display-lg text-[28px] font-extrabold text-primary tracking-tight">IntelliCounsel AI</h1>
+</div>
+<p class="font-label-mono text-secondary text-[12px] font-bold tracking-[0.2em] uppercase">Official Admission Forecast</p>
+</div>
+<div class="text-right">
+<div class="bg-surface-container-high px-4 py-2 rounded-sm mb-2">
+<span class="font-label-mono text-[12px] text-on-surface-variant">REPORT ID:</span>
+<span class="font-label-mono text-[12px] font-bold text-primary ml-2">ICA-2024-88402-RS</span>
+</div>
+<p class="font-label-mono text-[11px] text-on-surface-variant uppercase">Issued: 24 Oct 2024 | 14:32 IST</p>
+</div>
+</header>
+<!-- 2. Student Profile -->
+<section class="grid grid-cols-3 gap-gutter mb-12 relative z-10">
+<div class="col-span-2">
+<h3 class="font-label-mono text-[11px] font-bold text-secondary uppercase tracking-widest mb-4 border-l-4 border-secondary pl-3">Candidate Profile</h3>
+<div class="grid grid-cols-2 gap-6 bg-surface-container-low p-6 rounded-sm border border-outline-variant">
+<div>
+<p class="font-label-mono text-[10px] text-on-surface-variant uppercase">Candidate Name</p>
+<p class="font-headline-md text-[20px] font-bold text-primary">Rahul Sharma</p>
+</div>
+<div>
+<p class="font-label-mono text-[10px] text-on-surface-variant uppercase">Application ID</p>
+<p class="font-headline-md text-[20px] font-bold text-primary">JEEM-2024-0019</p>
+</div>
+<div>
+<p class="font-label-mono text-[10px] text-on-surface-variant uppercase">AIR Rank</p>
+<p class="font-stat-lg text-stat-lg text-secondary">18,402</p>
+</div>
+<div>
+<p class="font-label-mono text-[10px] text-on-surface-variant uppercase">Category</p>
+<p class="font-headline-md text-[20px] font-bold text-primary">General-EWS</p>
+</div>
+</div>
+</div>
+<div class="col-span-1 flex flex-col justify-end">
+<div class="bg-white border-2 border-primary-container p-4 flex flex-col items-center justify-center text-center">
+<div class="w-24 h-24 mb-3">
+<svg class="w-full h-full text-secondary" viewbox="0 0 36 36">
+<path class="stroke-current fill-none stroke-[3]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="82, 100"></path>
+<text class="font-bold text-[8px] text-center fill-current" text-anchor="middle" x="18" y="20.35">82%</text>
+</svg>
+</div>
+<p class="font-label-mono text-[10px] font-bold uppercase text-primary">Aggregate Match</p>
+<p class="text-[11px] text-on-surface-variant mt-1 leading-tight">Your rank is highly competitive for the selected preferences.</p>
+</div>
+</div>
+</section>
+<!-- 3. Top Recommendations -->
+<section class="mb-12 relative z-10">
+<h3 class="font-label-mono text-[11px] font-bold text-secondary uppercase tracking-widest mb-4 border-l-4 border-secondary pl-3">Top Institution Recommendations</h3>
+<div class="overflow-hidden border border-outline-variant rounded-sm">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-primary text-on-primary">
+<th class="font-label-mono text-[11px] py-4 px-6 uppercase">Institute & Program</th>
+<th class="font-label-mono text-[11px] py-4 px-6 uppercase text-center">Previous Cutoff</th>
+<th class="font-label-mono text-[11px] py-4 px-6 uppercase text-right">Admissions Probability</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr class="bg-white hover:bg-surface-container transition-colors">
+<td class="py-5 px-6">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-surface-container-high rounded-full overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A minimalist circular logo for a prestigious engineering institute, clean geometric shapes in Navy and White, academic professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDChEGkYZOsa6IL43-ZxO7bPNFWwb18tdTRXWI7x9hj4AdAg6T8r9P8zZbGBmf_u5dwdzzMbwnQA6Qxk5NGum2VAb11-WdXFkx9ZW4fLV6c7Xr3Yv8GPiZjh5m2sSDHJxzvs7oiPxAY2LGVagQ-QI4VJYXw-Nuyw8bLbpktn-Xf_y0Vl52ONstUdqVO4AD1fbyZztZ-VGWGF2l_dClFcBLlgmYJ1lUCEAM48zx1gkEArh0vmfNw0lOhtw"/>
+</div>
+<div>
+<p class="font-bold text-primary">IIT Kharagpur</p>
+<p class="text-[13px] text-on-surface-variant">Aerospace Engineering (4-Year B.Tech)</p>
+</div>
+</div>
+</td>
+<td class="py-5 px-6 text-center font-label-mono text-[14px]">19,200</td>
+<td class="py-5 px-6 text-right">
+<div class="flex items-center justify-end gap-2">
+<span class="font-bold text-on-tertiary-container text-[18px]">94%</span>
+<div class="w-16 h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-on-tertiary-container" style="width: 94%"></div>
+</div>
+</div>
+</td>
+</tr>
+<tr class="bg-surface-container-lowest hover:bg-surface-container transition-colors">
+<td class="py-5 px-6">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-surface-container-high rounded-full overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A minimalist circular logo for a technology research university, clean geometric lines in cobalt blue and silver, corporate academic style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWzgUuvT5KV3C2_hNNbMhcz2GJU7Ru3VeSqxZ_AGM_-dmhm-AqRVJtkbK07KDv6gzHW4StUE34o2-9O2fUnDfVmF4wLez2i4CcU-BwALiKL905w72aVGTHv-hYfYmL_-sllZrb3o0IXvVTCLi6RNdhOiw8EMNxPxQW1fQqZJcYFzrA1352NBV4UEkhFwUbkNStTcx7bzseMQi8LPH2jsomTB6hX7bUBuGK1qiirmGV0hOvw5zD2Uif-A"/>
+</div>
+<div>
+<p class="font-bold text-primary">NIT Trichy</p>
+<p class="text-[13px] text-on-surface-variant">Computer Science & Engineering</p>
+</div>
+</div>
+</td>
+<td class="py-5 px-6 text-center font-label-mono text-[14px]">17,850</td>
+<td class="py-5 px-6 text-right">
+<div class="flex items-center justify-end gap-2">
+<span class="font-bold text-secondary text-[18px]">78%</span>
+<div class="w-16 h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary" style="width: 78%"></div>
+</div>
+</div>
+</td>
+</tr>
+<tr class="bg-white hover:bg-surface-container transition-colors">
+<td class="py-5 px-6">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 bg-surface-container-high rounded-full overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="A minimalist university shield logo, professional heraldry style with modern navy and grey colors, clean vector design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcNQ-a34PYLG2myRGCyJifbv4jHxlI_WC1aZNuHzcRZTqJspkEEr4lxV8sVVLe7KDWEYPPwuqnJJ5910vgXfS8loThOu6GXpYOUGY6FgHWA_6yFbTt8yf0yn0qxCwzTcpeL80jxcmJIT_7uCCNfNaAEQ-PwlOOPJbQv2Z7bCMsW2JfrkGw2Nc9uLQDD2vvC4wMV1W-lCLdK91wXErX9bN1-DHVqoTupbq36gOmerb29tMUwtEgSSLJvA"/>
+</div>
+<div>
+<p class="font-bold text-primary">BITS Pilani</p>
+<p class="text-[13px] text-on-surface-variant">Electronics & Communication</p>
+</div>
+</div>
+</td>
+<td class="py-5 px-6 text-center font-label-mono text-[14px]">18,100</td>
+<td class="py-5 px-6 text-right">
+<div class="flex items-center justify-end gap-2">
+<span class="font-bold text-secondary text-[18px]">82%</span>
+<div class="w-16 h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary" style="width: 82%"></div>
+</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- 4. Strategic Action Plan -->
+<section class="mb-auto relative z-10">
+<h3 class="font-label-mono text-[11px] font-bold text-secondary uppercase tracking-widest mb-4 border-l-4 border-secondary pl-3">Strategic Action Plan (Rounds 1-3)</h3>
+<div class="grid grid-cols-1 gap-4">
+<div class="flex gap-6 p-5 border border-outline-variant bg-surface-container-low rounded-sm relative overflow-hidden">
+<div class="text-secondary font-display-lg text-[40px] opacity-20 font-black">01</div>
+<div>
+<p class="font-bold text-primary mb-1">Prioritize Aerospace over CS at Lower Tiers</p>
+<p class="text-[14px] text-on-surface-variant leading-relaxed">Given your AIR 18,402 and EWS status, you have a high probability of securing top-tier Aerospace seats. Avoid settling for CS at private institutes until Round 3 analysis.</p>
+</div>
+</div>
+<div class="flex gap-6 p-5 border border-outline-variant bg-surface-container-low rounded-sm relative overflow-hidden">
+<div class="text-secondary font-display-lg text-[40px] opacity-20 font-black">02</div>
+<div>
+<p class="font-bold text-primary mb-1">Utilize 'Freeze' with Caution in Round 1</p>
+<p class="text-[14px] text-on-surface-variant leading-relaxed">Unless you secure IIT Kharagpur in the first allocation, we strongly recommend opting for 'Float'. Predictive models suggest a 15% upward shift in NIT cutoffs by Round 2.</p>
+</div>
+</div>
+<div class="flex gap-6 p-5 border border-outline-variant bg-surface-container-low rounded-sm relative overflow-hidden">
+<div class="text-secondary font-display-lg text-[40px] opacity-20 font-black">03</div>
+<div>
+<p class="font-bold text-primary mb-1">EWS Certificate Verification</p>
+<p class="text-[14px] text-on-surface-variant leading-relaxed">Ensure your EWS documentation is dated post-April 1st, 2024. Failure to provide a valid certificate during Round 1 reporting will revert your status to General category.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. Footer -->
+<footer class="mt-16 pt-8 border-t border-outline-variant relative z-10">
+<div class="flex justify-between items-end">
+<div class="max-w-[60%]">
+<p class="font-label-mono text-[10px] text-on-surface-variant uppercase mb-2">Legal Disclaimer</p>
+<p class="text-[9px] text-outline leading-tight italic">This report is generated by the IntelliCounsel AI analytical engine based on historical data trends and real-time counseling patterns. Admission is subject to official counseling board regulations and physical verification. IntelliCounsel AI does not guarantee final seat allocation.</p>
+</div>
+<div class="flex flex-col items-end">
+<div class="flex items-center gap-2 mb-4">
+<div class="text-right">
+<p class="font-label-mono text-[10px] font-bold text-primary">VALIDATED BY AI</p>
+<p class="text-[9px] text-on-surface-variant">Auth Key: 9x-44-QZ-102</p>
+</div>
+<div class="w-12 h-12 rounded-full border-2 border-dashed border-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-[24px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<p class="font-label-mono text-[10px] text-on-surface-variant">© 2024 IntelliCounsel AI. All rights reserved.</p>
+</div>
+</div>
+</footer>
+<!-- Bottom Accent -->
+<div class="absolute bottom-0 left-0 w-full h-1.5 flex">
+<div class="h-full flex-1 bg-primary"></div>
+<div class="h-full flex-1 bg-secondary"></div>
+<div class="h-full flex-1 bg-secondary-container"></div>
+</div>
+</div>
+<!-- Global Footer (Shared Component) -->
+<footer class="w-full py-spacing-stack-lg border-t border-outline-variant mt-12 no-print">
+<div class="flex flex-col md:flex-row justify-between items-center px-spacing-margin-desktop max-w-container-max mx-auto gap-6">
+<div>
+<h4 class="font-headline-md text-headline-md font-black text-primary">IntelliCounsel AI</h4>
+<p class="font-label-mono text-label-mono text-on-surface-variant">© 2024 IntelliCounsel AI. All rights reserved.</p>
+</div>
+<div class="flex gap-8">
+<a class="font-label-mono text-label-mono text-on-surface-variant hover:underline decoration-secondary transition-all" href="#">About</a>
+<a class="font-label-mono text-label-mono text-on-surface-variant hover:underline decoration-secondary transition-all" href="#">Privacy Policy</a>
+<a class="font-label-mono text-label-mono text-on-surface-variant hover:underline decoration-secondary transition-all" href="#">Contact</a>
+<a class="font-label-mono text-label-mono text-on-surface-variant hover:underline decoration-secondary transition-all" href="#">GitHub</a>
+<a class="font-label-mono text-label-mono text-on-surface-variant hover:underline decoration-secondary transition-all" href="#">LinkedIn</a>
+</div>
+</div>
+</footer>
+</main>
+<script>
+        // Micro-interactions for digital report feel
+        document.querySelectorAll('tr').forEach(row => {
+            row.addEventListener('click', () => {
+                row.classList.add('scale-[0.995]');
+                setTimeout(() => row.classList.remove('scale-[0.995]'), 150);
+            });
+        });
+
+        // Simulating loading state for AI seal
+        window.addEventListener('DOMContentLoaded', () => {
+            const seal = document.querySelector('.material-symbols-outlined[style*="FILL"]');
+            if(seal) {
+                seal.style.opacity = '0';
+                seal.style.transform = 'scale(0.5)';
+                setTimeout(() => {
+                    seal.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    seal.style.opacity = '1';
+                    seal.style.transform = 'scale(1)';
+                }, 800);
+            }
+        });
+    </script>
+</body></html>
