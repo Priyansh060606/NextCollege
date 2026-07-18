@@ -1,0 +1,438 @@
+{% extends 'base.html' %}
+
+{% block title %}JEE Main Results — Round-wise Prediction — NextCollege AI{% endblock %}
+
+{% block extra_head %}
+<style>
+    .ai-border-gradient {
+        border: 1px solid transparent;
+        background: linear-gradient(white, white) padding-box, linear-gradient(to bottom right, #002294, #2c4de1) border-box;
+    }
+    .college-card {
+        transition: all 0.3s ease-in-out;
+    }
+    .college-card.hidden {
+        display: none;
+    }
+    .round-tab {
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    .round-tab::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 3px;
+        background: linear-gradient(to right, #002294, #2c4de1);
+        border-radius: 2px;
+        transition: width 0.3s ease;
+    }
+    .round-tab.active::after {
+        width: 80%;
+    }
+    .round-tab:hover {
+        transform: translateY(-2px);
+    }
+    .round-tab.active {
+        background: linear-gradient(135deg, #002294, #0033cc);
+        color: white;
+        box-shadow: 0 8px 20px rgba(0, 34, 148, 0.25);
+    }
+    .category-pill {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    .category-pill.active {
+        transform: scale(1.05);
+    }
+    .fade-in {
+        animation: fadeSlideIn 0.4s ease-out forwards;
+    }
+    @keyframes fadeSlideIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .round-badge {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 800;
+    }
+    .trend-arrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<header class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10">
+    <div>
+        <nav class="flex items-center gap-2 text-on-surface-variant font-label-md text-sm mb-2">
+            <a href="{% url 'predict' %}" class="hover:text-primary transition-colors">Predictor</a>
+            <span class="material-symbols-outlined text-sm">chevron_right</span>
+            <a href="{% url 'predict_mains' %}" class="hover:text-primary transition-colors">JEE Main</a>
+            <span class="material-symbols-outlined text-sm">chevron_right</span>
+            <span class="text-primary">Results</span>
+        </nav>
+        <h2 class="font-headline-md text-3xl font-bold text-on-surface mb-2">
+            <span class="ai-gradient-text">JEE Main</span> — Round-wise Predictions
+        </h2>
+        <div class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full border border-outline-variant/30">
+                <span class="material-symbols-outlined text-primary text-base">military_tech</span>
+                <span class="font-label-md text-on-surface">Rank: <span class="text-primary font-bold">{{ rank }}</span></span>
+            </div>
+            <div class="flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full border border-outline-variant/30">
+                <span class="material-symbols-outlined text-secondary text-base">tune</span>
+                <span class="font-label-md text-on-surface">{{ category }} • {{ gender }}</span>
+            </div>
+            <div class="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-full border border-primary/20">
+                <span class="material-symbols-outlined text-primary text-base">school</span>
+                <span class="font-label-md text-primary font-bold">NITs, IIITs, GFTIs</span>
+            </div>
+        </div>
+    </div>
+    <a href="{% url 'report' %}" class="flex items-center justify-center gap-2 bg-primary text-on-primary px-6 py-4 rounded-xl font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all w-full md:w-auto">
+        <span class="material-symbols-outlined">download</span>
+        Download Report
+    </a>
+</header>
+
+<!-- Round Selector Tabs -->
+<section class="mb-8">
+    <div class="flex items-center gap-2 mb-4">
+        <span class="material-symbols-outlined text-primary">timeline</span>
+        <h3 class="font-label-md text-on-surface font-bold uppercase tracking-wider text-sm">Select Counseling Round</h3>
+    </div>
+    <div class="grid grid-cols-3 md:grid-cols-6 gap-3" id="round-tabs">
+        {% for round_num in rounds %}
+        <button class="round-tab rounded-xl py-4 px-3 text-center border border-outline-variant/30 bg-white {% if round_num == selected_round %}active{% endif %}" 
+                data-round="{{ round_num }}" onclick="switchRound({{ round_num }})">
+            <div class="relative inline-block">
+                <span class="font-bold text-lg">R{{ round_num }}</span>
+            </div>
+            <p class="text-[11px] mt-1 {% if round_num == selected_round %}text-white/80{% else %}text-on-surface-variant{% endif %}">
+                {% if round_num == 1 %}Initial{% elif round_num == 2 %}Trend{% elif round_num == 3 %}Mid-Point{% elif round_num == 4 %}Major Shift{% elif round_num == 5 %}Final{% else %}Last Call{% endif %}
+            </p>
+        </button>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- AI Summary Widget -->
+<section class="ai-border-gradient rounded-2xl p-8 mb-10 flex flex-col md:flex-row items-start md:items-center gap-8 bg-white relative overflow-hidden">
+    <div class="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
+        <span class="material-symbols-outlined text-[120px]">auto_awesome</span>
+    </div>
+    <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center shrink-0 shadow-inner">
+        <span class="material-symbols-outlined text-primary text-[28px]" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+    </div>
+    <div class="flex-grow z-10">
+        <div class="flex items-center gap-2 mb-2">
+            <span class="font-label-md text-primary uppercase tracking-widest text-[13px] font-bold" id="round-analysis-title">Round {{ selected_round }} Analysis</span>
+        </div>
+        <p class="text-on-surface font-body-lg text-sm leading-relaxed" id="round-summary">
+            Showing <span class="font-bold text-primary">{{ total_found }}</span> college options in Round {{ selected_round }} for rank <span class="font-bold">{{ rank }}</span>.
+            {% if selected_round > 1 %}
+            Cutoffs have shifted compared to earlier rounds — check for new opportunities that opened up.
+            {% else %}
+            This is the initial round with the tightest cutoffs. Options typically expand in later rounds.
+            {% endif %}
+        </p>
+    </div>
+</section>
+
+<!-- Category Filters + Content -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <!-- Left: Category Tabs -->
+    <div class="lg:col-span-3 space-y-3 sticky top-24">
+        <button class="w-full flex items-center justify-between p-6 rounded-2xl bg-white shadow-sm border border-outline-variant/30 hover:border-orange-500/50 transition-all text-left group category-pill" id="cat-dream" onclick="switchCategory('dream')">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600">
+                    <span class="material-symbols-outlined">rocket_launch</span>
+                </div>
+                <div>
+                    <p class="font-label-md text-on-surface font-bold">Dream</p>
+                    <p class="text-[11px] text-on-surface-variant" id="dream-count">0 colleges</p>
+                </div>
+            </div>
+        </button>
+        <button class="w-full flex items-center justify-between p-6 rounded-2xl bg-white shadow-sm border border-outline-variant/30 hover:border-primary/50 transition-all text-left group category-pill active border-2 border-primary" id="cat-target" onclick="switchCategory('target')">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center">
+                    <span class="material-symbols-outlined">location_on</span>
+                </div>
+                <div>
+                    <p class="font-label-md text-on-surface font-bold">Target</p>
+                    <p class="text-[11px] text-on-surface-variant" id="target-count">0 colleges</p>
+                </div>
+            </div>
+        </button>
+        <button class="w-full flex items-center justify-between p-6 rounded-2xl bg-white shadow-sm border border-outline-variant/30 hover:border-green-500/50 transition-all text-left group category-pill" id="cat-safe" onclick="switchCategory('safe')">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center text-green-600">
+                    <span class="material-symbols-outlined">verified_user</span>
+                </div>
+                <div>
+                    <p class="font-label-md text-on-surface font-bold">Safe</p>
+                    <p class="text-[11px] text-on-surface-variant" id="safe-count">0 colleges</p>
+                </div>
+            </div>
+        </button>
+
+        <!-- Show All -->
+        <button class="w-full flex items-center justify-center gap-2 p-3 rounded-xl border border-outline-variant/30 text-on-surface-variant hover:text-primary hover:border-primary/30 transition-all text-sm font-bold" onclick="switchCategory('all')">
+            <span class="material-symbols-outlined text-base">grid_view</span>
+            Show All
+        </button>
+    </div>
+
+    <!-- Right: College Cards -->
+    <div class="lg:col-span-9">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="font-headline-sm text-xl font-bold text-on-surface" id="section-title">Target Colleges — Round {{ selected_round }}</h3>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="college-container">
+            {% for result in results %}
+            <div class="college-card group bg-white rounded-2xl border border-outline-variant/30 overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 fade-in" 
+                 data-category="{% if result.prob < 40 %}dream{% elif result.prob < 75 %}target{% else %}safe{% endif %}"
+                 data-round="{{ result.round_number }}"
+                 style="animation-delay: {{ forloop.counter0|divisibleby:1 }}ms">
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="pr-2 flex-grow">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full">R{{ result.round_number }}</span>
+                                {% if result.inst_type %}
+                                <span class="bg-surface-container text-on-surface-variant text-[10px] font-bold px-2 py-0.5 rounded-full">{{ result.inst_type }}</span>
+                                {% endif %}
+                            </div>
+                            <h4 class="font-bold text-[15px] text-on-surface group-hover:text-primary transition-colors leading-tight mb-1">{{ result.college_name }}</h4>
+                            <p class="text-on-surface-variant text-[13px]">{{ result.branch_name }}</p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <div class="flex items-center justify-center w-12 h-12 rounded-full border-[3px] {% if result.prob < 40 %}border-error/20 text-error{% elif result.prob < 75 %}border-secondary/20 text-secondary{% else %}border-on-tertiary-container/20 text-on-tertiary-container{% endif %} relative">
+                                <span class="text-[14px] font-bold">{{ result.prob }}%</span>
+                                <svg class="absolute inset-0 -rotate-90 w-full h-full" viewbox="0 0 36 36">
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" class="{% if result.prob < 40 %}stroke-error{% elif result.prob < 75 %}stroke-secondary{% else %}stroke-on-tertiary-container{% endif %}" stroke-dasharray="{{ result.prob }}, 100" stroke-width="3"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between pt-3 border-t border-outline-variant/20">
+                        <div class="flex items-center gap-4">
+                            <span class="text-[12px] text-on-surface-variant">
+                                <span class="font-bold">Cutoff:</span> {{ result.closing_rank|default:"—" }}
+                            </span>
+                            {% if result.opening_rank %}
+                            <span class="text-[12px] text-on-surface-variant">
+                                <span class="font-bold">Opening:</span> {{ result.opening_rank }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        <span class="text-[11px] px-2 py-0.5 rounded-full font-bold 
+                            {% if result.status == 'Safe' %}bg-green-50 text-green-700
+                            {% elif result.status == 'Target' %}bg-blue-50 text-blue-700
+                            {% else %}bg-orange-50 text-orange-700{% endif %}">
+                            {{ result.status }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="md:col-span-2 text-center py-16 bg-white border border-outline-variant/30 rounded-2xl">
+                <span class="material-symbols-outlined text-[48px] text-outline mb-5 block">search_off</span>
+                <p class="font-bold text-primary text-[18px] mb-2">No results for this round</p>
+                <p class="text-on-surface-variant text-[15px]">Try a different round or adjust your rank and filters.</p>
+                <a href="{% url 'predict_mains' %}" class="inline-block mt-4 px-6 py-2 bg-surface-container border border-outline-variant/50 rounded-lg text-primary font-bold hover:bg-surface-container-high transition-colors">Predict Again</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Round-wise data passed from Django
+    const roundData = {{ round_data_json|safe }};
+    const studentRank = {{ rank }};
+    
+    function switchRound(roundNum) {
+        // Update round tabs
+        document.querySelectorAll('.round-tab').forEach(tab => {
+            tab.classList.remove('active');
+            const label = tab.querySelector('p');
+            if (label) label.classList.remove('text-white/80');
+        });
+        const activeTab = document.querySelector(`[data-round="${roundNum}"]`);
+        activeTab.classList.add('active');
+
+        // Rebuild college cards from roundData
+        const container = document.getElementById('college-container');
+        const data = roundData[roundNum] || [];
+        
+        if (data.length === 0) {
+            container.innerHTML = `
+                <div class="md:col-span-2 text-center py-16 bg-white border border-outline-variant/30 rounded-2xl">
+                    <span class="material-symbols-outlined text-[48px] text-outline mb-5 block">search_off</span>
+                    <p class="font-bold text-primary text-[18px] mb-2">No results for Round ${roundNum}</p>
+                    <p class="text-on-surface-variant text-[15px]">Try a different round or adjust your rank.</p>
+                </div>
+            `;
+            updateCounts({dream: 0, target: 0, safe: 0});
+            return;
+        }
+
+        let html = '';
+        let counts = {dream: 0, target: 0, safe: 0};
+        
+        data.forEach((r, i) => {
+            const cat = r.prob < 40 ? 'dream' : (r.prob < 75 ? 'target' : 'safe');
+            counts[cat]++;
+            const statusClass = r.prob >= 75 ? 'bg-green-50 text-green-700' : (r.prob >= 40 ? 'bg-blue-50 text-blue-700' : 'bg-orange-50 text-orange-700');
+            const borderClass = r.prob >= 75 ? 'border-on-tertiary-container/20 text-on-tertiary-container' : (r.prob >= 40 ? 'border-secondary/20 text-secondary' : 'border-error/20 text-error');
+            const strokeClass = r.prob >= 75 ? 'stroke-on-tertiary-container' : (r.prob >= 40 ? 'stroke-secondary' : 'stroke-error');
+
+            html += `
+                <div class="college-card group bg-white rounded-2xl border border-outline-variant/30 overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 fade-in"
+                     data-category="${cat}" style="animation-delay: ${i * 30}ms">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="pr-2 flex-grow">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full">R${roundNum}</span>
+                                    ${r.inst_type ? `<span class="bg-surface-container text-on-surface-variant text-[10px] font-bold px-2 py-0.5 rounded-full">${r.inst_type}</span>` : ''}
+                                </div>
+                                <h4 class="font-bold text-[15px] text-on-surface group-hover:text-primary transition-colors leading-tight mb-1">${r.college_name}</h4>
+                                <p class="text-on-surface-variant text-[13px]">${r.branch_name}</p>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <div class="flex items-center justify-center w-12 h-12 rounded-full border-[3px] ${borderClass} relative">
+                                    <span class="text-[14px] font-bold">${r.prob}%</span>
+                                    <svg class="absolute inset-0 -rotate-90 w-full h-full" viewBox="0 0 36 36">
+                                        <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" class="${strokeClass}" stroke-dasharray="${r.prob}, 100" stroke-width="3"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between pt-3 border-t border-outline-variant/20">
+                            <div class="flex items-center gap-4">
+                                <span class="text-[12px] text-on-surface-variant"><span class="font-bold">Cutoff:</span> ${r.closing_rank || '—'}</span>
+                                ${r.opening_rank ? `<span class="text-[12px] text-on-surface-variant"><span class="font-bold">Opening:</span> ${r.opening_rank}</span>` : ''}
+                            </div>
+                            <span class="text-[11px] px-2 py-0.5 rounded-full font-bold ${statusClass}">
+                                ${r.status}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+        updateCounts(counts);
+
+        // Update summary
+        document.getElementById('round-analysis-title').innerText = `Round ${roundNum} Analysis`;
+        document.getElementById('round-summary').innerHTML = `
+            Showing <span class="font-bold text-primary">${data.length}</span> college options in Round ${roundNum} for rank <span class="font-bold">${studentRank}</span>.
+            ${roundNum > 1 ? 'Cutoffs have shifted compared to earlier rounds — check for new opportunities.' : 'This is the initial round with the tightest cutoffs.'}
+        `;
+        document.getElementById('section-title').innerText = `Target Colleges — Round ${roundNum}`;
+
+        // Apply current category filter
+        const activeCat = document.querySelector('.category-pill.active');
+        if (activeCat) {
+            const catType = activeCat.id.replace('cat-', '');
+            filterByCategory(catType);
+        }
+    }
+
+    function updateCounts(counts) {
+        document.getElementById('dream-count').innerText = `${counts.dream} colleges`;
+        document.getElementById('target-count').innerText = `${counts.target} colleges`;
+        document.getElementById('safe-count').innerText = `${counts.safe} colleges`;
+    }
+
+    function filterByCategory(type) {
+        const cards = document.querySelectorAll('.college-card');
+        cards.forEach(card => {
+            if (type === 'all' || card.dataset.category === type) {
+                card.classList.remove('hidden');
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+    }
+
+    function switchCategory(type) {
+        // Update pills
+        document.querySelectorAll('.category-pill').forEach(pill => {
+            pill.classList.remove('active', 'border-2', 'border-primary');
+            const iconDiv = pill.querySelector('.flex > div:first-child');
+            if (iconDiv) {
+                iconDiv.classList.remove('bg-orange-500', 'bg-primary', 'bg-green-500', 'text-white');
+                if (pill.id === 'cat-dream') iconDiv.classList.add('bg-orange-100', 'text-orange-600');
+                if (pill.id === 'cat-target') iconDiv.classList.add('bg-primary-container/10', 'text-primary');
+                if (pill.id === 'cat-safe') iconDiv.classList.add('bg-green-100', 'text-green-600');
+            }
+        });
+
+        if (type !== 'all') {
+            const activePill = document.getElementById(`cat-${type}`);
+            activePill.classList.add('active', 'border-2', 'border-primary');
+            const activeIconDiv = activePill.querySelector('.flex > div:first-child');
+            if (activeIconDiv) {
+                activeIconDiv.classList.remove('bg-orange-100', 'bg-primary-container/10', 'bg-green-100', 'text-orange-600', 'text-primary', 'text-green-600');
+                if (type === 'dream') activeIconDiv.classList.add('bg-orange-500', 'text-white');
+                if (type === 'target') activeIconDiv.classList.add('bg-primary', 'text-white');
+                if (type === 'safe') activeIconDiv.classList.add('bg-green-500', 'text-white');
+            }
+        }
+
+        filterByCategory(type);
+
+        const titles = {
+            dream: "Dream Colleges (Ambitious)",
+            target: "Target Colleges for You",
+            safe: "Safe Colleges (High Probability)",
+            all: "All Colleges"
+        };
+        const roundNum = document.querySelector('.round-tab.active')?.dataset.round || 1;
+        document.getElementById('section-title').innerText = `${titles[type]} — Round ${roundNum}`;
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+        switchCategory('target');
+        // Count initial results
+        const cards = document.querySelectorAll('.college-card');
+        let counts = {dream: 0, target: 0, safe: 0};
+        cards.forEach(card => {
+            const cat = card.dataset.category;
+            if (counts[cat] !== undefined) counts[cat]++;
+        });
+        updateCounts(counts);
+    });
+</script>
+{% endblock %}

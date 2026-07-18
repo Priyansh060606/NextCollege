@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Sign In with {{ process.provider.name }} - NextCollege AI{% endblock %}
+
+{% block content %}
+<main class="flex-grow flex items-center justify-center py-stack-lg px-margin-mobile relative overflow-hidden bg-surface-container-low min-h-[70vh]">
+    <div class="absolute inset-0 z-0 opacity-40 pointer-events-none"></div>
+    <div class="relative z-10 w-full max-w-[440px]">
+        <div class="bg-surface-container-lowest p-8 md:p-10 rounded-lg shadow-sm border border-outline-variant transition-all text-center">
+            
+            <div class="mb-6 bg-primary-container p-3 rounded-xl inline-flex mx-auto">
+                <span class="material-symbols-outlined text-on-primary-container text-[32px]">shield_person</span>
+            </div>
+            
+            <h1 class="font-headline-sm text-headline-sm text-on-surface mb-2">{% trans "Sign In" %}</h1>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mb-6">
+                {% blocktrans with provider.name as provider %}You are about to sign in using a third-party account from {{ provider }}.{% endblocktrans %}
+            </p>
+            
+            <form method="post" action="{% url 'google_login' %}">
+                {% csrf_token %}
+                <button type="submit" class="w-full ai-gradient-btn text-white py-4 rounded-lg font-bold text-body-md transition-all active:scale-[0.98] shadow-md flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">login</span>
+                    {% trans "Continue" %}
+                </button>
+            </form>
+            
+            <div class="mt-6">
+                <a href="{% url 'login' %}" class="text-primary font-bold hover:underline font-label-md">Cancel</a>
+            </div>
+            
+        </div>
+    </div>
+</main>
+{% endblock %}

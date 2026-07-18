@@ -1,31 +1,63 @@
 import os
 import joblib
 import pandas as pd
-from prophet import Prophet
+try:
+    from prophet import Prophet
+except ImportError:
+    Prophet = None
 from django.conf import settings
 from cutoffs.models import Cutoff
 
 class PredictionService:
     def __init__(self):
         self.xgb_model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'xgboost_admission_model.pkl')
+        
+        self.le_college_path = os.path.join(settings.BASE_DIR, 'ml_models', 'le_college.pkl')
+        self.le_branch_path = os.path.join(settings.BASE_DIR, 'ml_models', 'le_branch.pkl')
         self.le_category_path = os.path.join(settings.BASE_DIR, 'ml_models', 'le_category.pkl')
         self.le_seat_pool_path = os.path.join(settings.BASE_DIR, 'ml_models', 'le_seat_pool.pkl')
         
-        self.model = None
+        self.models = {}
+        self.le_college = None
+        self.le_branch = None
         self.le_category = None
         self.le_seat_pool = None
 
     def _load_models(self):
-        if not self.model and os.path.exists(self.xgb_model_path):
-            self.model = joblib.load(self.xgb_model_path)
+        if not self.le_category and os.path.exists(self.le_category_path):
+            self.le_college = joblib.load(self.le_college_path)
+            self.le_branch = joblib.load(self.le_branch_path)
             self.le_category = joblib.load(self.le_category_path)
             self.le_seat_pool = joblib.load(self.le_seat_pool_path)
+            
+        if 'xgboost' not in self.models and os.path.exists(self.xgb_model_path):
+            self.models['xgboost'] = joblib.load(self.xgb_model_path)
 
-    def predict_admission_probability(self, college_id, branch_id, category, seat_pool, student_rank):
-        """Returns the admission probability using the XGBoost model."""
+    def predict_admission_probability(self, college_id, branch_id, category, seat_pool, student_rank, model_type='xgboost'):
+        """Returns the admission probability using the specified model."""
         self._load_models()
-        if not self.model:
+        
+        model = self.models.get(model_type)
+        if not model:
             return None # Model not trained yet
+            
+        # Get college and branch names
+        from colleges.models import College, Branch
+        try:
+            college = College.objects.get(id=college_id)
+            branch = Branch.objects.get(id=branch_id)
+        except (College.DoesNotExist, Branch.DoesNotExist):
+            return 0
+            
+        try:
+            col_encoded = self.le_college.transform([college.name])[0]
+        except ValueError:
+            col_encoded = 0
+            
+        try:
+            br_encoded = self.le_branch.transform([branch.name])[0]
+        except ValueError:
+            br_encoded = 0
             
         try:
             cat_encoded = self.le_category.transform([category])[0]
@@ -37,51 +69,58 @@ class PredictionService:
         except ValueError:
             pool_encoded = 0
 
-        # Features: 'college_id', 'branch_id', 'category_encoded', 'seat_pool_encoded', 'student_rank'
         features = pd.DataFrame([{
-            'college_id': college_id,
-            'branch_id': branch_id,
+            'college_encoded': col_encoded,
+            'branch_encoded': br_encoded,
             'category_encoded': cat_encoded,
             'seat_pool_encoded': pool_encoded,
             'student_rank': student_rank
         }])
         
-        # predict_proba returns [[prob_0, prob_1]]
-        probability = self.model.predict_proba(features)[0][1]
+        probability = model.predict_proba(features)[0][1]
         return int(round(probability * 100, 0))
 
-    def predict_batch(self, inputs):
+    def predict_batch(self, inputs, model_type='xgboost'):
         """
         Returns probabilities for a batch of inputs to drastically speed up recommendation engine.
-        inputs is a list of dicts: [{'college_id': 1, 'branch_id': 2, 'category': 'OPEN', 'seat_pool': '...', 'student_rank': 500}]
         """
         self._load_models()
-        if not self.model or not inputs:
+        model = self.models.get(model_type)
+        if not model or not inputs:
             return []
 
         df = pd.DataFrame(inputs)
         
-        # Batch transform categories
-        known_cats = set(self.le_category.classes_)
-        df['category_encoded'] = df['category'].apply(
-            lambda x: self.le_category.transform([x])[0] if x in known_cats else 0
-        )
+        from colleges.models import College, Branch
         
-        known_pools = set(self.le_seat_pool.classes_)
-        df['seat_pool_encoded'] = df['seat_pool'].apply(
-            lambda x: self.le_seat_pool.transform([x])[0] if x in known_pools else 0
-        )
+        def safe_encode(encoder, val):
+            try:
+                return encoder.transform([val])[0]
+            except ValueError:
+                return 0
+                
+        # Resolve names and encode
+        college_cache = {c.id: c.name for c in College.objects.all()}
+        branch_cache = {b.id: b.name for b in Branch.objects.all()}
         
-        features = df[['college_id', 'branch_id', 'category_encoded', 'seat_pool_encoded', 'student_rank']]
+        df['college_encoded'] = df['college_id'].map(college_cache).apply(lambda x: safe_encode(self.le_college, x))
+        df['branch_encoded'] = df['branch_id'].map(branch_cache).apply(lambda x: safe_encode(self.le_branch, x))
         
-        # Predict all at once
-        probs = self.model.predict_proba(features)[:, 1]
+        df['category_encoded'] = df['category'].apply(lambda x: safe_encode(self.le_category, x))
+        df['seat_pool_encoded'] = df['seat_pool'].apply(lambda x: safe_encode(self.le_seat_pool, x))
+        
+        features = df[['college_encoded', 'branch_encoded', 'category_encoded', 'seat_pool_encoded', 'student_rank']]
+        
+        probs = model.predict_proba(features)[:, 1]
         
         return [int(round(p * 100, 0)) for p in probs]
 
 
-    def forecast_cutoff(self, college_id, branch_id, category, seat_pool):
-        """Uses Prophet to forecast the cutoff for the upcoming year (2026)."""
+    def forecast_cutoff(self, college_id, branch_id, category, seat_pool, model_type='prophet'):
+        """Forecasts the cutoff for the upcoming year (2026)."""
+
+            
+        # Default Prophet behavior
         history = Cutoff.objects.filter(
             college_id=college_id, 
             branch_id=branch_id, 
@@ -99,6 +138,7 @@ class PredictionService:
         df['ds'] = pd.to_datetime(df['year'], format='%Y')
         df['y'] = df['closing_rank']
         
+        if not Prophet: return None
         m = Prophet(yearly_seasonality=False, weekly_seasonality=False, daily_seasonality=False)
         m.fit(df)
         

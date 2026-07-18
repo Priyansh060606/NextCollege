@@ -4,13 +4,14 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.db.models import Count, Avg, Max, Min
-from prediction.services import PredictionService
 from recommendation.engine import RecommendationEngine
 from colleges.models import College, Branch
 from cutoffs.models import Cutoff
 import random
 import hashlib
+import json
 from datetime import datetime
+from django.db.models import Q
 
 
 class LoginView(View):
@@ -43,21 +44,124 @@ class HomeView(View):
 
 class PredictorView(View):
     def get(self, request):
+        """Exam selection page - choose between JEE Mains and JEE Advanced."""
+        # Count institute types for the selection page
+        nit_count = College.objects.filter(name__icontains='National Institute of Technology').count()
+        iiit_count = College.objects.filter(
+            Q(name__icontains='Indian Institute of Information Technology') |
+            Q(name__icontains='International Institute of Information Technology')
+        ).count()
+        iit_q = (
+            Q(name__icontains='Indian Institute of Technology') |
+            Q(name__icontains='Indian Institute  of Technology')
+        ) & ~Q(name__icontains='Information Technology') & ~Q(name__icontains='Carpet') & ~Q(name__icontains='Handloom') & ~Q(name__icontains='Engineering Science')
+        iit_count = College.objects.filter(iit_q).count()
+        total_colleges = College.objects.count()
+        gfti_count = total_colleges - nit_count - iiit_count - iit_count
+        
+        # Count IIT branches
+        iit_branch_count = Cutoff.objects.filter(
+            college__in=College.objects.filter(iit_q)
+        ).values('branch').distinct().count()
+        
+        return render(request, 'prediction/exam_select.html', {
+            'active_page': 'predict',
+            'nit_count': nit_count,
+            'iiit_count': iiit_count,
+            'iit_count': iit_count,
+            'gfti_count': gfti_count,
+            'iit_branch_count': iit_branch_count,
+        })
+
+
+class MainsPredictorView(View):
+    """JEE Main predictor form - NITs, IIITs, GFTIs."""
+    def get(self, request):
         categories = Cutoff.objects.values_list('category', flat=True).distinct().order_by('category')
         seat_pools = Cutoff.objects.values_list('seat_pool', flat=True).distinct().order_by('seat_pool')
-        return render(request, 'prediction/predictor.html', {
+        return render(request, 'prediction/predictor_mains.html', {
             'active_page': 'predict',
             'categories': categories,
             'seat_pools': seat_pools,
         })
 
 
+class AdvancedPredictorView(View):
+    """JEE Advanced predictor form - IITs only."""
+    def get(self, request):
+        categories = Cutoff.objects.values_list('category', flat=True).distinct().order_by('category')
+        seat_pools = Cutoff.objects.values_list('seat_pool', flat=True).distinct().order_by('seat_pool')
+        iit_q = (
+            Q(name__icontains='Indian Institute of Technology') |
+            Q(name__icontains='Indian Institute  of Technology')
+        ) & ~Q(name__icontains='Information Technology') & ~Q(name__icontains='Carpet') & ~Q(name__icontains='Handloom') & ~Q(name__icontains='Engineering Science')
+        iit_count = College.objects.filter(iit_q).count()
+        return render(request, 'prediction/predictor_advanced.html', {
+            'active_page': 'predict',
+            'categories': categories,
+            'seat_pools': seat_pools,
+            'iit_count': iit_count,
+        })
+
+
 class ResultView(View):
+    def _calculate_probability(self, closing_rank, student_rank):
+        """
+        Calculate admission probability based on the ratio of closing_rank to student_rank.
+        
+        Logic:
+        - ratio = closing_rank / student_rank
+        - ratio > 1 means the cutoff is higher (worse) than student's rank → student is BETTER → higher probability
+        - ratio < 1 means the cutoff is lower (better) than student's rank → student is WORSE → lower probability
+        
+        Probability mapping:
+        - ratio >= 5.0  → 98% (extremely safe, cutoff is 5x worse than your rank)
+        - ratio >= 3.0  → 92-98% (very safe)
+        - ratio >= 2.0  → 85-92% (safe)
+        - ratio >= 1.5  → 75-85% (safe)
+        - ratio >= 1.2  → 60-75% (target)
+        - ratio >= 1.0  → 40-60% (target, borderline)
+        - ratio >= 0.8  → 20-40% (dream, competitive)
+        - ratio >= 0.5  → 8-20% (dream, stretch)
+        - ratio < 0.5   → 3-8% (dream, long shot)
+        """
+        ratio = closing_rank / max(student_rank, 1)
+        
+        if ratio >= 5.0:
+            prob = 98
+        elif ratio >= 3.0:
+            # 92 to 98, linear interpolation
+            prob = 92 + (ratio - 3.0) / 2.0 * 6
+        elif ratio >= 2.0:
+            # 85 to 92
+            prob = 85 + (ratio - 2.0) / 1.0 * 7
+        elif ratio >= 1.5:
+            # 75 to 85
+            prob = 75 + (ratio - 1.5) / 0.5 * 10
+        elif ratio >= 1.2:
+            # 60 to 75
+            prob = 60 + (ratio - 1.2) / 0.3 * 15
+        elif ratio >= 1.0:
+            # 40 to 60
+            prob = 40 + (ratio - 1.0) / 0.2 * 20
+        elif ratio >= 0.8:
+            # 20 to 40
+            prob = 20 + (ratio - 0.8) / 0.2 * 20
+        elif ratio >= 0.5:
+            # 8 to 20
+            prob = 8 + (ratio - 0.5) / 0.3 * 12
+        else:
+            # 3 to 8
+            prob = max(3, 3 + ratio / 0.5 * 5)
+        
+        return int(round(min(98, max(3, prob)), 0))
+
     def post(self, request):
         rank = request.POST.get('rank')
         category = request.POST.get('category', 'OPEN')
         gender = request.POST.get('gender', 'Gender-Neutral')
         state = request.POST.get('state', '')
+        branch_pref = request.POST.get('branch', '')
         branch_pref = request.POST.get('branch', '')
 
         if not rank:
@@ -73,14 +177,32 @@ class ResultView(View):
 
         from django.db.models import Q
 
-        # Find cutoffs where the student's rank is within a reasonable range
+        # ---- Determine the closing rank search range ----
+        # Dream colleges: closing rank can be LOWER than student rank (harder to get in)
+        #   We look at colleges where closing rank >= rank * 0.3 (dreams / competitive)
+        # Safe colleges: closing rank is HIGHER than student rank (easier to get in)
+        #   Without branch filter: up to rank * 3 (manageable result set)
+        #   With branch filter: much wider (up to rank * 100, capped at a sensible max)
+        #   because some branches (e.g. IT) only exist in a few colleges with very high closing ranks
+        
+        lower_bound = max(1, int(student_rank * 0.3))
+        
+        if branch_pref:
+            # With a branch filter, cast a very wide net on the safe side
+            # e.g., rank 1000 → search up to closing rank 100,000
+            # This ensures we find ALL colleges offering that branch
+            upper_bound = max(int(student_rank * 100), 200000)
+        else:
+            # Without branch filter, use a moderate range to avoid too many results
+            upper_bound = int(student_rank * 3.5)
+
         query = Q(
             year=latest_year,
             category=category,
             seat_pool=gender,
             round_number=1,
-            closing_rank__gte=max(1, int(student_rank * 0.5)),
-            closing_rank__lte=int(student_rank * 2.5),
+            closing_rank__gte=lower_bound,
+            closing_rank__lte=upper_bound,
         )
 
         if state:
@@ -90,11 +212,28 @@ class ResultView(View):
 
         candidates = Cutoff.objects.filter(query).select_related('college', 'branch').order_by('closing_rank')
 
-        # Filter by branch preference if given strictly
+        # Filter by branch preference if given
         if branch_pref:
             candidates = candidates.filter(branch__name__icontains=branch_pref)
 
-        # Deduplicate by college-branch
+        # --- Fallback: if branch filter yields 0 results, try without round_number filter ---
+        if branch_pref and not candidates.exists():
+            fallback_query = Q(
+                year=latest_year,
+                category=category,
+                seat_pool=gender,
+                closing_rank__gte=1,
+            )
+            if state:
+                fallback_query &= (Q(quota__in=['AI', 'OS']) | Q(quota='HS', college__state__iexact=state))
+            else:
+                fallback_query &= Q(quota__in=['AI', 'OS'])
+            
+            candidates = Cutoff.objects.filter(fallback_query).filter(
+                branch__name__icontains=branch_pref
+            ).select_related('college', 'branch').order_by('closing_rank')
+
+        # Deduplicate by college-branch (keep the one with the best closing rank)
         seen = set()
         unique_candidates = []
         for c in candidates:
@@ -103,27 +242,10 @@ class ResultView(View):
                 seen.add(key)
                 unique_candidates.append(c)
 
-        # Try ML prediction, fall back to heuristic
-        service = PredictionService()
         results = []
 
-        for cand in unique_candidates:
-            prob = service.predict_admission_probability(
-                cand.college_id, cand.branch_id, category, gender, student_rank
-            )
-
-            if prob is None:
-                # Fallback heuristic: probability based on rank vs cutoff ratio
-                ratio = cand.closing_rank / max(student_rank, 1)
-                if ratio > 1.5:
-                    prob = min(98, 70 + ratio * 10)
-                elif ratio > 1.0:
-                    prob = 40 + (ratio - 1.0) * 60
-                elif ratio > 0.7:
-                    prob = 10 + (ratio - 0.7) * 100
-                else:
-                    prob = max(5, ratio * 15)
-                prob = int(round(prob, 0))
+        for i, cand in enumerate(unique_candidates):
+            prob = self._calculate_probability(cand.closing_rank, student_rank)
 
             if prob >= 75:
                 status = 'Safe'
@@ -144,7 +266,7 @@ class ResultView(View):
                 'closing_rank': cand.closing_rank,
             })
 
-        # Sort and balance the results
+        # Sort and balance the results — show top picks from each category
         results.sort(key=lambda x: x['prob'], reverse=True)
         safe_results = [r for r in results if r['status'] == 'Safe'][:20]
         target_results = [r for r in results if r['status'] == 'Target'][:20]
@@ -167,6 +289,337 @@ class ResultView(View):
             'results': balanced_results,
             'total_found': len(balanced_results),
         })
+
+
+class _RoundWiseResultBase(View):
+    """Base class for round-wise prediction logic shared by Mains and Advanced views."""
+
+    def _calculate_probability(self, closing_rank, student_rank):
+        ratio = closing_rank / max(student_rank, 1)
+        if ratio >= 5.0:
+            prob = 98
+        elif ratio >= 3.0:
+            prob = 92 + (ratio - 3.0) / 2.0 * 6
+        elif ratio >= 2.0:
+            prob = 85 + (ratio - 2.0) / 1.0 * 7
+        elif ratio >= 1.5:
+            prob = 75 + (ratio - 1.5) / 0.5 * 10
+        elif ratio >= 1.2:
+            prob = 60 + (ratio - 1.2) / 0.3 * 15
+        elif ratio >= 1.0:
+            prob = 40 + (ratio - 1.0) / 0.2 * 20
+        elif ratio >= 0.8:
+            prob = 20 + (ratio - 0.8) / 0.2 * 20
+        elif ratio >= 0.5:
+            prob = 8 + (ratio - 0.5) / 0.3 * 12
+        else:
+            prob = max(3, 3 + ratio / 0.5 * 5)
+        return int(round(min(98, max(3, prob)), 0))
+
+    def _get_institute_type(self, college_name):
+        """Classify college into NIT, IIIT, IIT, or GFTI."""
+        import re
+        # Normalize multiple spaces to single for reliable matching
+        name = re.sub(r'\s+', ' ', college_name.lower().strip())
+        if 'indian institute of technology' in name and 'information' not in name and 'carpet' not in name and 'handloom' not in name and 'engineering science' not in name:
+            return 'IIT'
+        elif 'national institute of technology' in name:
+            return 'NIT'
+        elif 'indian institute of information technology' in name or 'iiit' in name:
+            return 'IIIT'
+        else:
+            return 'GFTI'
+
+    # IIT tier classification constants
+    TOP_IIT_KEYWORDS = ['bombay', 'delhi', 'madras', 'kanpur', 'kharagpur', 'roorkee', 'guwahati']
+    MID_IIT_KEYWORDS = ['hyderabad', 'bhu', 'varanasi', 'dhanbad', 'ism', 'indore', 'ropar',
+                        'patna', 'gandhinagar', 'bhubaneswar', 'mandi', 'jodhpur', 'tirupati']
+
+    def _get_iit_tier(self, college_name):
+        """Classify an IIT into Top, Mid, or New tier."""
+        name = college_name.lower()
+        for kw in self.TOP_IIT_KEYWORDS:
+            if kw in name:
+                return 'Top'
+        for kw in self.MID_IIT_KEYWORDS:
+            if kw in name:
+                return 'Mid'
+        return 'New'
+
+    def _get_college_filter(self, exam_type, request=None):
+        """Return a Q filter to include/exclude colleges based on exam type."""
+        iit_q = (
+            Q(college__name__icontains='Indian Institute of Technology') |
+            Q(college__name__icontains='Indian Institute  of Technology')
+        ) & ~Q(college__name__icontains='Information Technology') & ~Q(college__name__icontains='Carpet') & ~Q(college__name__icontains='Handloom') & ~Q(college__name__icontains='Engineering Science')
+        
+        if exam_type == 'advanced':
+            base_filter = iit_q
+            # Apply IIT tier filtering if checkboxes are present
+            if request and (request.POST.get('tier_top') or request.POST.get('tier_mid') or request.POST.get('tier_new')):
+                tier_filter = Q()
+                has_tier = False
+                if request.POST.get('tier_top'):
+                    for kw in self.TOP_IIT_KEYWORDS:
+                        tier_filter |= Q(college__name__icontains=kw)
+                    has_tier = True
+                if request.POST.get('tier_mid'):
+                    for kw in self.MID_IIT_KEYWORDS:
+                        tier_filter |= Q(college__name__icontains=kw)
+                    has_tier = True
+                if request.POST.get('tier_new'):
+                    # New IITs = IITs not in Top or Mid
+                    new_q = Q()
+                    for kw in self.TOP_IIT_KEYWORDS + self.MID_IIT_KEYWORDS:
+                        new_q &= ~Q(college__name__icontains=kw)
+                    tier_filter |= new_q
+                    has_tier = True
+                if has_tier:
+                    return base_filter & tier_filter
+            return base_filter
+        else:
+            # Mains: exclude IITs, optionally filter by institute type checkboxes
+            exclude_iit = ~iit_q
+            inst_filters = Q()
+            has_filter = False
+            
+            if request and request.POST.get('inst_nit'):
+                inst_filters |= Q(college__name__icontains='National Institute of Technology')
+                has_filter = True
+            if request and request.POST.get('inst_iiit'):
+                inst_filters |= Q(college__name__icontains='Indian Institute of Information Technology')
+                inst_filters |= Q(college__name__icontains='International Institute of Information Technology')
+                has_filter = True
+            if request and request.POST.get('inst_gfti'):
+                # GFTIs = everything that's not IIT, NIT, or IIIT
+                gfti_q = ~Q(college__name__icontains='National Institute of Technology')
+                gfti_q &= ~Q(college__name__icontains='Indian Institute of Information Technology')
+                gfti_q &= ~Q(college__name__icontains='International Institute of Information Technology')
+                gfti_q &= ~iit_q
+                inst_filters |= gfti_q
+                has_filter = True
+            
+            if has_filter:
+                return exclude_iit & inst_filters
+            return exclude_iit
+
+    def _build_round_wise_results(self, student_rank, category, gender, state, branch_pref, exam_type, request=None):
+        """Build prediction results for all 6 rounds."""
+        latest_year = Cutoff.objects.aggregate(Max('year'))['year__max'] or 2025
+        
+        lower_bound = max(1, int(student_rank * 0.3))
+        if branch_pref:
+            upper_bound = max(int(student_rank * 100), 200000)
+        elif exam_type == 'advanced':
+            # IIT closing ranks can be very high even for top rankers (many branches)
+            upper_bound = max(int(student_rank * 3.5), 50000)
+        else:
+            upper_bound = max(int(student_rank * 3.5), 10000)
+
+        college_filter = self._get_college_filter(exam_type, request)
+        
+        # Get all available rounds
+        available_rounds = list(
+            Cutoff.objects.filter(year=latest_year)
+            .values_list('round_number', flat=True)
+            .distinct()
+            .order_by('round_number')
+        )
+        if not available_rounds:
+            available_rounds = [1, 2, 3, 4, 5, 6]
+
+        round_data = {}
+        selected_round_results = []
+        selected_round = available_rounds[0] if available_rounds else 1
+
+        for round_num in available_rounds:
+            query = Q(
+                year=latest_year,
+                category=category,
+                seat_pool=gender,
+                round_number=round_num,
+                closing_rank__gte=lower_bound,
+                closing_rank__lte=upper_bound,
+            )
+            
+            # Apply college type filter (IIT only for Advanced, non-IIT for Mains)
+            query &= college_filter
+
+            if state:
+                query &= (Q(quota__in=['AI', 'OS']) | Q(quota='HS', college__state__iexact=state))
+            else:
+                if exam_type == 'advanced':
+                    query &= Q(quota='AI')
+                else:
+                    query &= Q(quota__in=['AI', 'OS'])
+
+            candidates = Cutoff.objects.filter(query).select_related('college', 'branch').order_by('closing_rank')
+
+            if branch_pref:
+                candidates = candidates.filter(branch__name__icontains=branch_pref)
+
+            # Fallback without upper bound if branch filter yields 0
+            if branch_pref and not candidates.exists():
+                fallback_q = Q(
+                    year=latest_year,
+                    category=category,
+                    seat_pool=gender,
+                    round_number=round_num,
+                    closing_rank__gte=1,
+                )
+                fallback_q &= college_filter
+                if state:
+                    fallback_q &= (Q(quota__in=['AI', 'OS']) | Q(quota='HS', college__state__iexact=state))
+                else:
+                    if exam_type == 'advanced':
+                        fallback_q &= Q(quota='AI')
+                    else:
+                        fallback_q &= Q(quota__in=['AI', 'OS'])
+                candidates = Cutoff.objects.filter(fallback_q).filter(
+                    branch__name__icontains=branch_pref
+                ).select_related('college', 'branch').order_by('closing_rank')
+
+            seen = set()
+            results = []
+            for i, c in enumerate(candidates):
+                key = (c.college_id, c.branch_id)
+                if key not in seen:
+                    seen.add(key)
+                    prob = self._calculate_probability(c.closing_rank, student_rank)
+                    
+                    if prob >= 75:
+                        status = 'Safe'
+                    elif prob >= 40:
+                        status = 'Target'
+                    else:
+                        status = 'Dream'
+                    
+                    result_entry = {
+                        'college_name': c.college.name,
+                        'branch_name': c.branch.name,
+                        'prob': prob,
+                        'status': status,
+                        'closing_rank': c.closing_rank,
+                        'opening_rank': c.opening_rank,
+                        'round_number': round_num,
+                        'inst_type': self._get_institute_type(c.college.name),
+                    }
+                    # Add IIT tier for Advanced exam type
+                    if exam_type == 'advanced':
+                        result_entry['iit_tier'] = self._get_iit_tier(c.college.name)
+                    results.append(result_entry)
+
+            # Sort and limit
+            results.sort(key=lambda x: x['prob'], reverse=True)
+            safe = [r for r in results if r['status'] == 'Safe'][:25]
+            target = [r for r in results if r['status'] == 'Target'][:25]
+            dream = [r for r in results if r['status'] == 'Dream'][:25]
+            balanced = safe + target + dream
+            balanced.sort(key=lambda x: x['prob'], reverse=True)
+
+            round_data[round_num] = balanced
+            if round_num == selected_round:
+                selected_round_results = balanced
+
+        return {
+            'rounds': available_rounds,
+            'selected_round': selected_round,
+            'round_data': round_data,
+            'results': selected_round_results,
+            'total_found': len(selected_round_results),
+            'latest_year': latest_year,
+        }
+
+
+class MainsResultView(_RoundWiseResultBase):
+    """Round-wise result view for JEE Main (NITs, IIITs, GFTIs)."""
+
+    def post(self, request):
+        rank = request.POST.get('rank')
+        category = request.POST.get('category', 'OPEN')
+        gender = request.POST.get('gender', 'Gender-Neutral')
+        state = request.POST.get('state', '')
+        branch_pref = request.POST.get('branch', '')
+        branch_pref = request.POST.get('branch', '')
+
+        if not rank:
+            return redirect('predict_mains')
+
+        try:
+            student_rank = int(rank)
+        except ValueError:
+            return redirect('predict_mains')
+
+        data = self._build_round_wise_results(student_rank, category, gender, state, branch_pref, 'mains', request)
+
+        # Save to session
+        request.session['student_rank'] = rank
+        request.session['category'] = category
+        request.session['gender'] = gender
+        request.session['state'] = state
+        request.session['exam_type'] = 'mains'
+
+        return render(request, 'prediction/result_mains.html', {
+            'active_page': 'predict',
+            'rank': rank,
+            'category': category,
+            'gender': gender,
+            'results': data['results'],
+            'total_found': data['total_found'],
+            'rounds': data['rounds'],
+            'selected_round': data['selected_round'],
+            'round_data_json': json.dumps(data['round_data']),
+        })
+
+
+class AdvancedResultView(_RoundWiseResultBase):
+    """Round-wise result view for JEE Advanced (IITs only)."""
+
+    def post(self, request):
+        rank = request.POST.get('rank')
+        category = request.POST.get('category', 'OPEN')
+        gender = request.POST.get('gender', 'Gender-Neutral')
+        state = request.POST.get('state', '')
+        branch_pref = request.POST.get('branch', '')
+        branch_pref = request.POST.get('branch', '')
+
+        if not rank:
+            return redirect('predict_advanced')
+
+        try:
+            student_rank = int(rank)
+        except ValueError:
+            return redirect('predict_advanced')
+
+        data = self._build_round_wise_results(student_rank, category, gender, state, branch_pref, 'advanced', request)
+
+        # Count IIT tiers in the selected round results
+        tier_counts = {'Top': 0, 'Mid': 0, 'New': 0}
+        for r in data['results']:
+            tier = r.get('iit_tier', 'New')
+            if tier in tier_counts:
+                tier_counts[tier] += 1
+
+        # Save to session
+        request.session['student_rank'] = rank
+        request.session['category'] = category
+        request.session['gender'] = gender
+        request.session['state'] = state
+        request.session['exam_type'] = 'advanced'
+
+        return render(request, 'prediction/result_advanced.html', {
+            'active_page': 'predict',
+            'rank': rank,
+            'category': category,
+            'gender': gender,
+            'results': data['results'],
+            'total_found': data['total_found'],
+            'rounds': data['rounds'],
+            'selected_round': data['selected_round'],
+            'round_data_json': json.dumps(data['round_data']),
+            'tier_counts': tier_counts,
+        })
+
 
 
 class RecommendationView(View):
@@ -396,19 +849,32 @@ class ReportView(View):
 
         seen = set()
         top_picks = []
-        service = PredictionService()
 
         for cand in candidates:
             key = (cand.college_id, cand.branch_id)
             if key not in seen:
                 seen.add(key)
-                prob = service.predict_admission_probability(
-                    cand.college_id, cand.branch_id, category, gender, student_rank
-                )
-                if prob is None:
-                    ratio = cand.closing_rank / max(student_rank, 1)
-                    prob = min(98, max(5, ratio * 60))
-                prob = int(round(prob, 0))
+                ratio = cand.closing_rank / max(student_rank, 1)
+                # Use same heuristic as ResultView
+                if ratio >= 5.0:
+                    prob = 98
+                elif ratio >= 3.0:
+                    prob = 92 + (ratio - 3.0) / 2.0 * 6
+                elif ratio >= 2.0:
+                    prob = 85 + (ratio - 2.0) / 1.0 * 7
+                elif ratio >= 1.5:
+                    prob = 75 + (ratio - 1.5) / 0.5 * 10
+                elif ratio >= 1.2:
+                    prob = 60 + (ratio - 1.2) / 0.3 * 15
+                elif ratio >= 1.0:
+                    prob = 40 + (ratio - 1.0) / 0.2 * 20
+                elif ratio >= 0.8:
+                    prob = 20 + (ratio - 0.8) / 0.2 * 20
+                elif ratio >= 0.5:
+                    prob = 8 + (ratio - 0.5) / 0.3 * 12
+                else:
+                    prob = max(3, 3 + ratio / 0.5 * 5)
+                prob = int(round(min(98, max(3, prob)), 0))
 
                 top_picks.append({
                     'college': cand.college.name,

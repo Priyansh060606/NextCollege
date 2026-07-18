@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Colleges Directory — IntelliCounsel AI{% endblock %}
+{% block title %}Colleges Directory — NextCollege AI{% endblock %}
 
 {% block content %}
 <!-- Header with Search -->
@@ -33,22 +33,18 @@
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
     {% for college in colleges %}
     <a href="{% url 'college_detail' college.id %}" class="group bg-white rounded-2xl border border-outline-variant/30 overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 block">
-        <div class="h-32 bg-surface-container relative overflow-hidden">
-            <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style="background-image: url('{% cycle 'https://lh3.googleusercontent.com/aida-public/AB6AXuCFXc19Fam6VH5x0k9c0fod30VeFz-VRatjAprCnTcy3XhtaGwh2z5lM8giir4gc6TL7-Wrutb9rMXuo6uQTniA2EBBFfpQeqGkolyv62Gn39hnz1Gcb8EKZL8MOW-XPXbSBLI_zm-T6F4NLKVd5EU0Amb5eZrE1yTUlmmtT0edT1_sxWiVdzXvvJSJO8AHFheLFlEdADOOXeBQCmZ2_7viZO93FEEFhpI8l0iAR1vTK-FZv4aTg5rICQ' 'https://lh3.googleusercontent.com/aida-public/AB6AXuCz7VFk49326yy0xW882o5D8wzzebfgTV57oG7vnI97BNuC43q39U7inVZ0M8L13_ITodgw6QNFr_ONLMijBabRGcmNwsda7j8rQqVg1T6B-jHe1SrMOSAY8CAbzdyx4QzIdpTJyZNtrVoI4-7ZwXPxTwQXCRt1qpM5NTvTZGG976xM4QEFYeDFbJxuGFi8lMzCSJTLgE4nEtJfRwKnhR-HC0PBqQ0qBUEI6niGUXvDdOR-Q3kQNiqUmA' 'https://lh3.googleusercontent.com/aida-public/AB6AXuA4r8iqEwsoCjp98n_W1uhWj8DDlsxt8G3iGiGb9AGF9jG5Xw6aWjyKydi4l3gl5a176j4kxXw2reXlRdLs3TZ5-jtRR7lu1h_9eIuEkkUgG15yzI1nLucFQQjlWHjRRtME3IPfQxOPZLM_KNP49DteOa0RlOq4-Y8jf4W7G0XGVqrQCzrluB1VLs44a3lRj8fPcGuZGgpMbwLpVp9hvmrZ2TeygiWxcjvg0jjGtGp-tD0lgDGKY9Dqaw' %}')"></div>
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-            <div class="absolute bottom-3 left-4 right-4 flex justify-between items-end">
-                {% if college.nirf_rank %}
-                <span class="bg-white/20 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border border-white/20">NIRF #{{ college.nirf_rank }}</span>
-                {% else %}
-                <span></span>
-                {% endif %}
-                <span class="text-white/80 text-[15px] font-bold tracking-widest uppercase flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">location_on</span> {{ college.state }}</span>
-            </div>
-        </div>
-        
         <div class="p-6">
+            <div class="flex items-center justify-between gap-2 mb-4">
+                <span class="text-on-surface-variant text-[11px] font-bold tracking-wider uppercase flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px]">location_on</span> {{ college.state }}
+                </span>
+                {% if college.nirf_rank %}
+                <span class="bg-primary/5 text-primary text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider border border-primary/10">NIRF #{{ college.nirf_rank }}</span>
+                {% endif %}
+            </div>
+
             <div class="mb-4">
-                <h4 class="font-bold text-[18px] text-on-surface group-hover:text-primary transition-colors leading-tight mb-1">{{ college.name|truncatechars:45 }}</h4>
+                <h4 class="font-bold text-[18px] text-on-surface group-hover:text-primary transition-colors leading-tight mb-1">{{ college.name|truncatechars:55 }}</h4>
             </div>
             
             <div class="flex gap-8 mt-4 text-center border-t border-outline-variant/20 pt-4">

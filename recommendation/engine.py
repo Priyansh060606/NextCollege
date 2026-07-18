@@ -1,11 +1,38 @@
 from cutoffs.models import Cutoff
 from colleges.models import College, Branch
-from prediction.services import PredictionService
 from django.db.models import Max
 
 class RecommendationEngine:
     def __init__(self):
-        self.prediction_service = PredictionService()
+        pass
+
+    def _calculate_probability(self, closing_rank, student_rank):
+        """
+        Calculate admission probability based on the ratio of closing_rank to student_rank.
+        Matches the logic in ResultView for consistency.
+        """
+        ratio = closing_rank / max(student_rank, 1)
+        
+        if ratio >= 5.0:
+            prob = 98
+        elif ratio >= 3.0:
+            prob = 92 + (ratio - 3.0) / 2.0 * 6
+        elif ratio >= 2.0:
+            prob = 85 + (ratio - 2.0) / 1.0 * 7
+        elif ratio >= 1.5:
+            prob = 75 + (ratio - 1.5) / 0.5 * 10
+        elif ratio >= 1.2:
+            prob = 60 + (ratio - 1.2) / 0.3 * 15
+        elif ratio >= 1.0:
+            prob = 40 + (ratio - 1.0) / 0.2 * 20
+        elif ratio >= 0.8:
+            prob = 20 + (ratio - 0.8) / 0.2 * 20
+        elif ratio >= 0.5:
+            prob = 8 + (ratio - 0.5) / 0.3 * 12
+        else:
+            prob = max(3, 3 + ratio / 0.5 * 5)
+        
+        return int(round(min(98, max(3, prob)), 0))
 
     def _generate_action_plan(self, rank, category, seat_pool, state):
         plan = []
@@ -71,11 +98,6 @@ class RecommendationEngine:
         latest_year = Cutoff.objects.aggregate(Max('year'))['year__max'] or 2025
 
         # 2. Heuristic Filter: Find realistic options from the latest year
-        # We don't want to run the ML model on 50,000 combinations. 
-        # We fetch historical cutoffs that are somewhat close to the student's rank.
-        # Dream: Rank is up to 3x the closing rank (e.g., Rank 3000, Closing 1000)
-        # Safe: Rank is much lower than closing rank (e.g., Rank 3000, Closing 8000)
-        
         min_rank_threshold = max(1, int(student_rank * 0.3))
         max_rank_threshold = int(student_rank * 3.0)
 
@@ -96,8 +118,6 @@ class RecommendationEngine:
 
         candidates = Cutoff.objects.filter(query).select_related('college', 'branch')
 
-        # If state is provided, we might want to prioritize home state quota, but for MVP keep it simple
-        
         # Deduplicate candidates (take the last round's cutoff for each college-branch combo)
         unique_candidates = {}
         for c in candidates:
@@ -108,51 +128,25 @@ class RecommendationEngine:
         if not unique_candidates:
             return {"dream": [], "target": [], "safe": []}
 
-        # 3. Prepare Batch Input for XGBoost
-        batch_inputs = []
+        # 3. Calculate probabilities using ratio-based heuristic
         candidate_list = list(unique_candidates.values())
-        
-        for cand in candidate_list:
-            batch_inputs.append({
-                'college_id': cand.college_id,
-                'branch_id': cand.branch_id,
-                'category': category,
-                'seat_pool': seat_pool,
-                'student_rank': student_rank
-            })
 
-        # 4. Predict Probabilities in Bulk
-        probabilities = self.prediction_service.predict_batch(batch_inputs)
-
-        if not probabilities:
-            # Fallback heuristic if ML model is not trained
-            probabilities = []
-            for cand in candidate_list:
-                ratio = cand.closing_rank / max(student_rank, 1)
-                if ratio > 1.5:
-                    prob = min(98, 70 + ratio * 10)
-                elif ratio > 1.0:
-                    prob = 40 + (ratio - 1.0) * 60
-                elif ratio > 0.7:
-                    prob = 10 + (ratio - 0.7) * 100
-                else:
-                    prob = max(1, ratio * 15)
-                probabilities.append(int(round(prob, 0)))
-
-        # 5. Categorize into Dream, Target, Safe
+        # 4. Categorize into Dream, Target, Safe
         dream, target, safe = [], [], []
 
-        for cand, prob in zip(candidate_list, probabilities):
+        for cand in candidate_list:
+            prob = self._calculate_probability(cand.closing_rank, student_rank)
+
             result = {
                 'college': cand.college.name,
                 'branch': cand.branch.name,
                 'historical_closing_rank': cand.closing_rank,
-                'admission_probability': int(prob)
+                'admission_probability': prob
             }
             
-            if prob >= 75.0:
+            if prob >= 75:
                 safe.append(result)
-            elif prob >= 40.0:
+            elif prob >= 40:
                 target.append(result)
             else:
                 dream.append(result)
@@ -168,3 +162,4 @@ class RecommendationEngine:
             "safe": safe[:15],      # Top 15 Safe
             "action_plan": self._generate_action_plan(student_rank, category, seat_pool, state)
         }
+

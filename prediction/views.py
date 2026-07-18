@@ -24,12 +24,12 @@ class AdmissionPredictionView(APIView):
 
         service = PredictionService()
         
-        # ML Model 1: XGBoost Probability
+        # ML Model 1: Probability
         probability = service.predict_admission_probability(
             college_id, branch_id, category, seat_pool, student_rank
         )
         
-        # ML Model 2: Prophet Forecasting
+        # ML Model 2: Forecasting using Prophet
         forecast_rank = service.forecast_cutoff(
             college_id, branch_id, category, seat_pool
         )

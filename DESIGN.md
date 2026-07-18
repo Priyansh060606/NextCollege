@@ -1,5 +1,5 @@
 ---
-name: IntelliCounsel AI
+name: NextCollege AI
 colors:
   surface: '#f7f9fb'
   surface-dim: '#d8dadc'

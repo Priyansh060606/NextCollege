@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+
+{% block title %}Choose Your Exam — NextCollege AI{% endblock %}
+
+{% block extra_head %}
+<style>
+    .exam-card {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        cursor: pointer;
+    }
+    .exam-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 2px;
+        background: linear-gradient(135deg, transparent, transparent);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        transition: background 0.4s ease;
+    }
+    .exam-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.12);
+    }
+    .exam-card.mains-card:hover::before {
+        background: linear-gradient(135deg, #002294, #0033cc, #2c4de1);
+    }
+    .exam-card.mains-card:hover {
+        box-shadow: 0 20px 60px -15px rgba(0, 34, 148, 0.25);
+    }
+    .exam-card.advanced-card:hover::before {
+        background: linear-gradient(135deg, #821dda, #9c42f4, #c084fc);
+    }
+    .exam-card.advanced-card:hover {
+        box-shadow: 0 20px 60px -15px rgba(130, 29, 218, 0.25);
+    }
+    .exam-card .card-icon {
+        transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .exam-card:hover .card-icon {
+        transform: scale(1.15) rotate(-5deg);
+    }
+    .exam-card .arrow-icon {
+        transition: transform 0.3s ease;
+    }
+    .exam-card:hover .arrow-icon {
+        transform: translateX(6px);
+    }
+    .floating-shape {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0.04;
+        pointer-events: none;
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(5deg); }
+    }
+    .float-anim {
+        animation: float 6s ease-in-out infinite;
+    }
+    .float-anim-delay {
+        animation: float 8s ease-in-out 2s infinite;
+    }
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .slide-up {
+        animation: slideUp 0.6s ease-out forwards;
+    }
+    .slide-up-delay {
+        animation: slideUp 0.6s ease-out 0.15s forwards;
+        opacity: 0;
+    }
+    .slide-up-delay-2 {
+        animation: slideUp 0.6s ease-out 0.3s forwards;
+        opacity: 0;
+    }
+    .stat-chip {
+        transition: all 0.3s ease;
+    }
+    .exam-card:hover .stat-chip {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="relative">
+    <!-- Floating decorative shapes -->
+    <div class="floating-shape float-anim w-96 h-96 bg-primary -top-20 -right-20" style="position: fixed;"></div>
+    <div class="floating-shape float-anim-delay w-72 h-72 bg-secondary -bottom-10 -left-10" style="position: fixed;"></div>
+
+    <!-- Header Section -->
+    <div class="text-center mb-16 slide-up">
+        <div class="inline-flex items-center gap-2 bg-surface-container px-4 py-2 rounded-full border border-outline-variant/30 mb-6">
+            <span class="material-symbols-outlined text-secondary text-base" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+            <span class="font-label-mono text-secondary text-xs uppercase tracking-widest font-bold">AI-Powered Prediction</span>
+        </div>
+        <h1 class="font-headline-md text-4xl md:text-5xl font-extrabold text-on-surface mb-4 tracking-tight">
+            Choose Your Exam
+        </h1>
+        <p class="text-on-surface-variant text-lg max-w-2xl mx-auto leading-relaxed">
+            Select the entrance exam you've appeared for. Our prediction engine will analyze
+            <span class="font-bold text-primary">round-wise cutoff data</span> to find your best-fit colleges.
+        </p>
+    </div>
+
+    <!-- Exam Cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto mb-16">
+        <!-- JEE Mains Card -->
+        <a href="{% url 'predict_mains' %}" class="exam-card mains-card bg-white rounded-3xl border border-outline-variant/30 p-10 block slide-up-delay">
+            <div class="flex items-start justify-between mb-8">
+                <div class="card-icon w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined text-white text-3xl">school</span>
+                </div>
+                <div class="arrow-icon flex items-center gap-1 text-primary/50 mt-2">
+                    <span class="text-sm font-bold uppercase tracking-wider">Enter</span>
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </div>
+            </div>
+
+            <h2 class="font-headline-md text-2xl font-extrabold text-on-surface mb-3">JEE Main</h2>
+            <p class="text-on-surface-variant text-sm leading-relaxed mb-8">
+                Predict admission chances in <span class="font-bold text-primary">NITs, IIITs, and GFTIs</span> based on your JEE Main rank. View round-wise cutoff trends across all 6 counseling rounds.
+            </p>
+
+            <!-- Stats Row -->
+            <div class="grid grid-cols-3 gap-3 mb-8">
+                <div class="stat-chip bg-surface-container-low rounded-xl p-3 text-center border border-outline-variant/20">
+                    <p class="font-bold text-primary text-xl">{{ nit_count }}</p>
+                    <p class="text-[11px] text-on-surface-variant font-medium uppercase tracking-wide">NITs</p>
+                </div>
+                <div class="stat-chip bg-surface-container-low rounded-xl p-3 text-center border border-outline-variant/20">
+                    <p class="font-bold text-primary text-xl">{{ iiit_count }}</p>
+                    <p class="text-[11px] text-on-surface-variant font-medium uppercase tracking-wide">IIITs</p>
+                </div>
+                <div class="stat-chip bg-surface-container-low rounded-xl p-3 text-center border border-outline-variant/20">
+                    <p class="font-bold text-primary text-xl">{{ gfti_count }}</p>
+                    <p class="text-[11px] text-on-surface-variant font-medium uppercase tracking-wide">GFTIs</p>
+                </div>
+            </div>
+
+            <!-- Tags -->
+            <div class="flex flex-wrap gap-2">
+                <span class="bg-primary/5 text-primary px-3 py-1 rounded-full text-xs font-bold border border-primary/10">6 Rounds</span>
+                <span class="bg-primary/5 text-primary px-3 py-1 rounded-full text-xs font-bold border border-primary/10">NITs</span>
+                <span class="bg-primary/5 text-primary px-3 py-1 rounded-full text-xs font-bold border border-primary/10">IIITs</span>
+                <span class="bg-primary/5 text-primary px-3 py-1 rounded-full text-xs font-bold border border-primary/10">GFTIs</span>
+            </div>
+        </a>
+
+        <!-- JEE Advanced Card -->
+        <a href="{% url 'predict_advanced' %}" class="exam-card advanced-card bg-white rounded-3xl border border-outline-variant/30 p-10 block slide-up-delay-2">
+            <div class="flex items-start justify-between mb-8">
+                <div class="card-icon w-16 h-16 rounded-2xl bg-gradient-to-br from-secondary to-secondary-container flex items-center justify-center shadow-lg shadow-secondary/20">
+                    <span class="material-symbols-outlined text-white text-3xl">workspace_premium</span>
+                </div>
+                <div class="arrow-icon flex items-center gap-1 text-secondary/50 mt-2">
+                    <span class="text-sm font-bold uppercase tracking-wider">Enter</span>
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </div>
+            </div>
+
+            <h2 class="font-headline-md text-2xl font-extrabold text-on-surface mb-3">JEE Advanced</h2>
+            <p class="text-on-surface-variant text-sm leading-relaxed mb-8">
+                Predict admission chances exclusively in <span class="font-bold text-secondary">IITs</span> based on your JEE Advanced rank. Explore branch-level round-wise allocation data across all rounds.
+            </p>
+
+            <!-- Stats Row -->
+            <div class="grid grid-cols-3 gap-3 mb-8">
+                <div class="stat-chip bg-secondary/5 rounded-xl p-3 text-center border border-secondary/10">
+                    <p class="font-bold text-secondary text-xl">{{ iit_count }}</p>
+                    <p class="text-[11px] text-on-surface-variant font-medium uppercase tracking-wide">IITs</p>
+                </div>
+                <div class="stat-chip bg-secondary/5 rounded-xl p-3 text-center border border-secondary/10">
+                    <p class="font-bold text-secondary text-xl">6</p>
+                    <p class="text-[11px] text-on-surface-variant font-medium uppercase tracking-wide">Rounds</p>
+                </div>
+                <div class="stat-chip bg-secondary/5 rounded-xl p-3 text-center border border-secondary/10">
+                    <p class="font-bold text-secondary text-xl">{{ iit_branch_count }}</p>
+                    <p class="text-[11px] text-on-surface-variant font-medium uppercase tracking-wide">Programs</p>
+                </div>
+            </div>
+
+            <!-- Tags -->
+            <div class="flex flex-wrap gap-2">
+                <span class="bg-secondary/5 text-secondary px-3 py-1 rounded-full text-xs font-bold border border-secondary/10">6 Rounds</span>
+                <span class="bg-secondary/5 text-secondary px-3 py-1 rounded-full text-xs font-bold border border-secondary/10">IITs Only</span>
+                <span class="bg-secondary/5 text-secondary px-3 py-1 rounded-full text-xs font-bold border border-secondary/10">Elite Institutes</span>
+            </div>
+        </a>
+    </div>
+
+    <!-- Info Section -->
+    <div class="max-w-5xl mx-auto">
+        <div class="bg-surface-container-low rounded-2xl border border-outline-variant/20 p-8">
+            <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-primary">info</span>
+                </div>
+                <div>
+                    <h4 class="font-bold text-on-surface mb-2">How does round-wise prediction work?</h4>
+                    <p class="text-on-surface-variant text-sm leading-relaxed">
+                        JoSAA counseling happens in <span class="font-bold">6 rounds</span>. Cutoffs often drop significantly from Round 1 to Round 6 as students withdraw seats. 
+                        Our AI analyzes historical cutoff movement across all rounds to predict which colleges you might gain access to in later rounds — giving you a strategic advantage in choice-filling.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

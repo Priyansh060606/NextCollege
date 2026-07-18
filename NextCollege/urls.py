@@ -7,15 +7,21 @@ from django.views.generic import TemplateView
 from prediction.ui_views import (
     HomeView, PredictorView, ResultView, RecommendationView,
     CollegeListView, CollegeDetailView, AnalyticsView, ReportView,
-    LoginView, RegisterView, ROIAnalysisView, ChatView
+    LoginView, RegisterView, ROIAnalysisView, ChatView,
+    MainsPredictorView, AdvancedPredictorView, MainsResultView, AdvancedResultView
 )
 
 urlpatterns = [
+    path('accounts/', include('allauth.urls')),
     path('', HomeView.as_view(), name='home'),
     path('login/', LoginView.as_view(), name='login'),
     path('register/', RegisterView.as_view(), name='register'),
     path('predict/', PredictorView.as_view(), name='predict'),
+    path('predict/mains/', MainsPredictorView.as_view(), name='predict_mains'),
+    path('predict/advanced/', AdvancedPredictorView.as_view(), name='predict_advanced'),
     path('result/', ResultView.as_view(), name='result'),
+    path('result/mains/', MainsResultView.as_view(), name='result_mains'),
+    path('result/advanced/', AdvancedResultView.as_view(), name='result_advanced'),
     path('recommend/', RecommendationView.as_view(), name='recommend'),
     path('analytics/', AnalyticsView.as_view(), name='analytics'),
     path('roi-analysis/', ROIAnalysisView.as_view(), name='roi_analysis'),
@@ -30,3 +36,4 @@ urlpatterns = [
     path('api/recommendations/', include('recommendation.urls')),
     path('api/analytics/', include('analytics.urls')),
 ]
+

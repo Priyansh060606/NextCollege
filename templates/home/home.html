@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>IntelliCounsel AI | Engineering Admissions Revolutionized</title>
+    <title>NextCollege AI | Engineering Admissions Revolutionized</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
@@ -159,7 +159,7 @@
 <header class="fixed top-0 w-full z-50 glass-header h-20 transition-all duration-200 ease-in-out">
     <nav class="flex justify-between items-center px-margin-desktop max-w-container-max mx-auto h-full">
         <div class="flex items-center gap-2">
-            <span class="text-headline-sm font-headline-sm font-bold text-primary">IntelliCounsel AI</span>
+            <span class="text-headline-sm font-headline-sm font-bold text-primary">NextCollege AI</span>
         </div>
         <div class="hidden md:flex items-center gap-8">
             <a class="font-label-md text-label-md text-primary border-b-2 border-primary pb-1 transition-colors" href="{% url 'home' %}">Home</a>
@@ -219,7 +219,7 @@
 
             <!-- Hero Image/Dashboard Preview -->
             <div class="mt-20 w-full max-w-5xl rounded-2xl overflow-hidden shadow-2xl border border-outline-variant/30">
-                <img class="w-full object-cover" alt="IntelliCounsel AI Dashboard Preview" src="{% static 'images/dashboard_preview.png' %}"/>
+                <img class="w-full object-cover" alt="NextCollege AI Dashboard Preview" src="{% static 'images/dashboard_preview.png' %}"/>
             </div>
             </div>
         </div>
@@ -250,7 +250,6 @@
         <div class="max-w-container-max mx-auto px-margin-desktop">
             <div class="text-center mb-16">
                 <h2 class="font-headline-md text-headline-md text-on-background mb-4">Powerful Tools for Your Success</h2>
-                <p class="font-body-md text-on-surface-variant max-w-2xl mx-auto">Navigate the complex engineering admission landscape with tools designed by expert counselors and AI researchers.</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
@@ -262,7 +261,7 @@
                                 <span class="material-symbols-outlined">analytics</span>
                             </div>
                             <h3 class="text-headline-sm font-headline-sm mb-4">AI Admission Predictor</h3>
-                            <p class="text-on-surface-variant font-body-md max-w-md">Our proprietary algorithm analyzes million+ historical data points to predict your admission probability with unmatched precision.</p>
+                            <p class="text-on-surface-variant font-body-md max-w-md">Our algorithm uses historical cutoff data to estimate your admission probability based on past trends.</p>
                         </div>
                         <a href="{% url 'predict' %}" class="mt-12 flex items-center gap-2 text-primary font-label-md cursor-pointer hover:gap-8 transition-all inline-block">
                             Explore Predictor <span class="material-symbols-outlined">arrow_forward</span>
@@ -323,8 +322,7 @@
             <div class="relative rounded-3xl overflow-hidden bg-primary p-12 md:p-20 text-center">
                 <div class="absolute inset-0 opacity-20 pointer-events-none"></div>
                 <div class="relative z-10">
-                    <h2 class="font-display-lg text-white mb-6">Ready to secure your engineering seat?</h2>
-                    <p class="text-primary-fixed font-body-lg mb-10 max-w-xl mx-auto">Join 10,000+ students who have already simplified their admission journey with IntelliCounsel AI.</p>
+                    <h2 class="font-display-lg text-white mb-10">Ready to secure your engineering seat?</h2>
                     <div class="flex flex-wrap justify-center gap-4">
                         <a href="{% url 'college_list' %}" class="px-10 py-5 rounded-full bg-white text-primary font-bold shadow-lg hover:scale-105 transition-transform">Start Searching Now</a>
                         <a href="{% url 'predict' %}" class="px-10 py-5 rounded-full border-2 border-white/30 text-white font-bold hover:bg-white/10 transition-colors">Go to Predictor</a>
@@ -336,57 +334,11 @@
 </main>
 
 <!-- Professional Footer -->
-<footer class="bg-surface-container-lowest border-t border-outline-variant/50 w-full pt-16 pb-8">
-    <div class="max-w-container-max mx-auto px-margin-desktop">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-            <div class="col-span-1 md:col-span-1">
-                <span class="text-headline-sm font-headline-sm font-bold text-primary mb-6 block">IntelliCounsel AI</span>
-                <p class="text-body-sm text-on-surface-variant">The leading AI-powered counseling platform for engineering aspirants across India. We provide transparency and data-driven insights for every step of the admission process.</p>
-            </div>
-            <div>
-                <h4 class="font-label-md text-label-md text-on-background mb-6">Product</h4>
-                <ul class="space-y-4 text-body-sm text-on-surface-variant">
-                    <li><a class="hover:text-primary transition-colors" href="{% url 'predict' %}">College Predictor</a></li>
-                    <li><a class="hover:text-primary transition-colors" href="{% url 'college_list' %}">College Directory</a></li>
-                    <li><a class="hover:text-primary transition-colors" href="{% url 'analytics' %}">Cutoff History</a></li>
-                    <li><a class="hover:text-primary transition-colors" href="#">Pricing Plans</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="font-label-md text-label-md text-on-background mb-6">Resources</h4>
-                <ul class="space-y-4 text-body-sm text-on-surface-variant">
-                    <li><a class="hover:text-primary transition-colors" href="#">Counseling Guide</a></li>
-                    <li><a class="hover:text-primary transition-colors" href="#">State Quota Info</a></li>
-                    <li><a class="hover:text-primary transition-colors" href="#">Exam Alerts</a></li>
-                    <li><a class="hover:text-primary transition-colors" href="#">ROI Calculator</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="font-label-md text-label-md text-on-background mb-6">Contact</h4>
-                <ul class="space-y-4 text-body-sm text-on-surface-variant">
-                    <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">mail</span> support@intellicounsel.ai</li>
-                    <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">call</span> +91 (800) 123-4567</li>
-                    <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px]">location_on</span> Tech Hub, Bangalore</li>
-                </ul>
-            </div>
-        </div>
-        
-        <div class="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-outline-variant/30 gap-4">
-            <p class="font-body-sm text-body-sm text-on-surface-variant">© 2026 IntelliCounsel AI. All rights reserved.</p>
-            <div class="flex gap-8">
-                <a class="text-body-sm text-on-surface-variant hover:text-primary" href="#">Privacy Policy</a>
-                <a class="text-body-sm text-on-surface-variant hover:text-primary" href="#">Terms of Service</a>
-                <a class="text-body-sm text-on-surface-variant hover:text-primary" href="#">Career Guidance</a>
-            </div>
-            <div class="flex gap-4">
-                <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant cursor-pointer hover:bg-primary hover:text-white transition-all">
-                    <span class="material-symbols-outlined">share</span>
-                </div>
-                <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant cursor-pointer hover:bg-primary hover:text-white transition-all">
-                    <span class="material-symbols-outlined">forum</span>
-                </div>
-            </div>
-        </div>
+<footer class="bg-surface-container-lowest border-t border-outline-variant/50 w-full py-8">
+    <div class="max-w-container-max mx-auto px-margin-desktop text-center">
+        <span class="text-headline-sm font-headline-sm font-bold text-primary mb-2 block">NextCollege AI</span>
+        <p class="text-body-sm text-on-surface-variant max-w-2xl mx-auto">The leading AI-powered counseling platform for engineering aspirants across India. We provide transparency and data-driven insights for every step of the admission process.</p>
+        <p class="text-xs text-on-surface-variant/60 mt-4">&copy; 2026 NextCollege AI. All rights reserved.</p>
     </div>
 </footer>
 
