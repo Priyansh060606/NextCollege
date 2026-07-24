@@ -12,6 +12,12 @@ class College(models.Model):
     average_fees = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, help_text="Total course fees in INR")
     average_package = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, help_text="Average placement package in INR (LPA)")
 
+    @property
+    def average_fees_lakhs(self):
+        if self.average_fees and self.average_fees > 0:
+            return round(float(self.average_fees) / 100000.0, 2)
+        return None
+
     def __str__(self):
         return self.name
 
@@ -21,16 +27,3 @@ class Branch(models.Model):
     
     def __str__(self):
         return self.name
-
-class SeatMatrix(models.Model):
-    college = models.ForeignKey(College, on_delete=models.CASCADE, related_name='seats')
-    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='seats')
-    category = models.CharField(max_length=50) # General, OBC, SC, ST, EWS, etc.
-    quota = models.CharField(max_length=50)    # HS (Home State), OS (Other State), AI (All India)
-    total_seats = models.IntegerField(default=0)
-
-    class Meta:
-        unique_together = ('college', 'branch', 'category', 'quota')
-
-    def __str__(self):
-        return f"{self.college.short_name or self.college.name} - {self.branch.name} ({self.category})"

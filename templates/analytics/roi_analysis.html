@@ -43,7 +43,7 @@
                 <tr class="bg-surface-container-lowest border-b border-outline-variant/30">
                     <th class="p-5 font-label-mono text-sm text-on-surface-variant font-bold uppercase tracking-widest">Rank</th>
                     <th class="p-5 font-label-mono text-sm text-on-surface-variant font-bold uppercase tracking-widest">Institute</th>
-                    <th class="p-5 font-label-mono text-sm text-on-surface-variant font-bold uppercase tracking-widest">Est. Course Fees</th>
+                    <th class="p-5 font-label-mono text-sm text-on-surface-variant font-bold uppercase tracking-widest">Est. Course Fees (Lakhs)</th>
                     <th class="p-5 font-label-mono text-sm text-on-surface-variant font-bold uppercase tracking-widest">Avg Package (LPA)</th>
                     <th class="p-5 font-label-mono text-sm text-on-surface-variant font-bold uppercase tracking-widest">ROI Score</th>
                 </tr>
@@ -61,7 +61,7 @@
                         <p class="text-sm text-on-surface-variant">{{ item.college.state }}</p>
                     </td>
                     <td class="p-5 font-mono font-medium text-on-surface">
-                        ₹{{ item.college.average_fees|floatformat:"0" }}
+                        {% if item.college.average_fees_lakhs %}₹{{ item.college.average_fees_lakhs|floatformat:2 }}L{% else %}N/A{% endif %}
                     </td>
                     <td class="p-5">
                         <div class="flex items-center gap-2">

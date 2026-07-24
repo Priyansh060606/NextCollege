@@ -172,7 +172,6 @@
             </a>
         </div>
         <div class="flex items-center gap-4">
-            <a href="{% url 'login' %}" class="hidden lg:block px-6 py-2 rounded-full font-label-md text-label-md text-primary hover:bg-primary-container/10 transition-all">Sign In</a>
             <a href="{% url 'predict' %}" class="px-6 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:shadow-lg transition-all active:scale-95 inline-flex">Get Started</a>
         </div>
     </nav>
@@ -254,31 +253,31 @@
             
             <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
                 <!-- Feature Card 1: Predictor -->
-                <div class="md:col-span-8 group relative overflow-hidden rounded-2xl border border-outline-variant bg-white p-8 hover:shadow-xl transition-all duration-300">
-                    <div class="flex flex-col h-full justify-between relative z-10">
-                        <div>
-                            <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
-                                <span class="material-symbols-outlined">analytics</span>
-                            </div>
-                            <h3 class="text-headline-sm font-headline-sm mb-4">AI Admission Predictor</h3>
-                            <p class="text-on-surface-variant font-body-md max-w-md">Our algorithm uses historical cutoff data to estimate your admission probability based on past trends.</p>
+                <div class="md:col-span-4 group relative overflow-hidden rounded-2xl border border-outline-variant bg-white p-8 hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined">analytics</span>
                         </div>
-                        <a href="{% url 'predict' %}" class="mt-12 flex items-center gap-2 text-primary font-label-md cursor-pointer hover:gap-8 transition-all inline-block">
-                            Explore Predictor <span class="material-symbols-outlined">arrow_forward</span>
-                        </a>
+                        <h3 class="text-headline-sm font-headline-sm mb-4">AI Admission Predictor</h3>
+                        <p class="text-on-surface-variant font-body-md">Our algorithm uses historical cutoff data to estimate your admission probability based on past trends.</p>
                     </div>
+                    <a href="{% url 'predict' %}" class="mt-8 flex items-center gap-2 text-primary font-label-md cursor-pointer hover:gap-4 transition-all inline-block">
+                        Explore Predictor <span class="material-symbols-outlined">arrow_forward</span>
+                    </a>
                 </div>
                 
                 <!-- Feature Card 2: ROI -->
-                <a href="{% url 'roi_analysis' %}" class="md:col-span-4 group rounded-2xl border border-outline-variant bg-white p-8 hover:shadow-xl hover:border-primary/50 transition-all duration-300 block">
-                    <div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary mb-6 group-hover:scale-110 transition-transform">
-                        <span class="material-symbols-outlined">payments</span>
+                <a href="{% url 'roi_analysis' %}" class="md:col-span-4 group rounded-2xl border border-outline-variant bg-white p-8 hover:shadow-xl hover:border-primary/50 transition-all duration-300 flex flex-col justify-between block">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary mb-6 group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined">payments</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-headline-sm font-headline-sm">ROI Analysis</h3>
+                            <span class="material-symbols-outlined text-secondary opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward</span>
+                        </div>
+                        <p class="text-on-surface-variant font-body-sm">Compare fees, average packages, and industry reputation to make a financially sound decision.</p>
                     </div>
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-headline-sm font-headline-sm">ROI Analysis</h3>
-                        <span class="material-symbols-outlined text-secondary opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward</span>
-                    </div>
-                    <p class="text-on-surface-variant font-body-sm">Compare fees, average packages, and industry reputation to make a financially sound decision.</p>
                     <div class="mt-8 pt-8 border-t border-outline-variant/30 flex justify-center">
                         <div class="text-center">
                             <span class="text-headline-sm font-bold text-on-background">Live Data</span>
@@ -288,29 +287,17 @@
                 </a>
 
                 <!-- Feature Card 3: Counseling -->
-                <div class="md:col-span-4 group rounded-2xl border border-outline-variant bg-white p-8 hover:shadow-xl transition-all duration-300">
-                    <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
-                        <span class="material-symbols-outlined">person_pin</span>
-                    </div>
-                    <h3 class="text-headline-sm font-headline-sm mb-4">Strategic Counseling</h3>
-                    <p class="text-on-surface-variant font-body-sm">Personalized preference filling strategies to ensure you get the best possible branch in your target college.</p>
-                </div>
-
-                <!-- Feature Card 4: Alerts -->
-                <div class="md:col-span-8 group relative overflow-hidden rounded-2xl bg-inverse-surface p-8 hover:shadow-2xl transition-all duration-300">
-                    <div class="flex flex-col md:flex-row items-center gap-8 relative z-10">
-                        <div class="flex-grow">
-                            <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-white mb-6">
-                                <span class="material-symbols-outlined">notifications_active</span>
-                            </div>
-                            <h3 class="text-headline-sm font-headline-sm text-white mb-4">Real-time Cutoff Alerts</h3>
-                            <p class="text-surface-variant font-body-md">Never miss a deadline. Get instant push notifications when cutoffs are released or counseling rounds begin.</p>
-                            <a href="{% url 'register' %}" class="mt-6 px-6 py-2 bg-white text-primary rounded-lg font-label-md inline-block">Enable Alerts</a>
+                <div class="md:col-span-4 group rounded-2xl border border-outline-variant bg-white p-8 hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined">person_pin</span>
                         </div>
-                        <div class="w-full md:w-1/3 flex justify-center">
-                            <span class="material-symbols-outlined text-[120px] text-primary-container/20">cell_tower</span>
-                        </div>
+                        <h3 class="text-headline-sm font-headline-sm mb-4">Strategic Counseling</h3>
+                        <p class="text-on-surface-variant font-body-sm">Personalized preference filling strategies to ensure you get the best possible branch in your target college.</p>
                     </div>
+                    <a href="{% url 'chat' %}" class="mt-8 flex items-center gap-2 text-primary font-label-md cursor-pointer hover:gap-4 transition-all inline-block">
+                        AI Counselor <span class="material-symbols-outlined">arrow_forward</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -336,9 +323,7 @@
 <!-- Professional Footer -->
 <footer class="bg-surface-container-lowest border-t border-outline-variant/50 w-full py-8">
     <div class="max-w-container-max mx-auto px-margin-desktop text-center">
-        <span class="text-headline-sm font-headline-sm font-bold text-primary mb-2 block">NextCollege AI</span>
-        <p class="text-body-sm text-on-surface-variant max-w-2xl mx-auto">The leading AI-powered counseling platform for engineering aspirants across India. We provide transparency and data-driven insights for every step of the admission process.</p>
-        <p class="text-xs text-on-surface-variant/60 mt-4">&copy; 2026 NextCollege AI. All rights reserved.</p>
+        <span class="text-headline-sm font-headline-sm font-bold text-primary block">NextCollege AI</span>
     </div>
 </footer>
 

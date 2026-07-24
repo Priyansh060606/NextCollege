@@ -7,11 +7,11 @@
 <div class="flex justify-between items-start mb-8">
     <div>
         <h2 class="font-headline-md text-headline-md text-on-surface">AI Counseling Strategy</h2>
-        <p class="text-on-surface-variant text-[15px]">Personalized admission strategy for Rank {{ rank }}.</p>
+        <p class="text-on-surface-variant text-[15px]">Personalized admission strategy for Rank {{ rank }}{% if branch %} ({{ branch }}){% endif %}.</p>
     </div>
     <div class="bg-surface-container-high px-6 py-2 rounded-2xl">
         <span class="font-label-mono text-[15px] text-on-surface-variant">PROFILE:</span>
-        <span class="font-label-mono text-[15px] font-bold text-primary ml-1">{{ rank }} | {{ category }} | {{ gender }}</span>
+        <span class="font-label-mono text-[15px] font-bold text-primary ml-1">Rank {{ rank }}{% if branch %} | {{ branch }}{% endif %} | {{ category }} | {{ gender }}</span>
     </div>
 </div>
 
@@ -57,75 +57,36 @@
     </div>
     
     <div class="space-y-4">
-        <!-- Choice 1 -->
-        <div class="flex items-center gap-6 p-6 bg-white border-2 border-primary/20 rounded-2xl hover:shadow-lg transition-all group relative overflow-hidden">
+        {% for choice in strategy.choice_order %}
+        <div class="flex items-center gap-6 p-6 bg-white border border-outline-variant/50 rounded-2xl hover:shadow-lg hover:border-primary/40 transition-all group relative overflow-hidden">
+            {% if forloop.first %}
             <div class="absolute left-0 top-0 bottom-0 w-2 bg-primary"></div>
-            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xl shadow-md">
-                1
+            {% endif %}
+            <div class="flex-shrink-0 w-12 h-12 rounded-full {% if forloop.first %}bg-primary text-white{% else %}bg-surface-container-high text-on-surface border border-outline-variant/30 group-hover:bg-primary/10 group-hover:text-primary{% endif %} flex items-center justify-center font-bold text-xl shadow-md transition-colors">
+                {{ choice.rank_num }}
             </div>
             <div class="flex-grow">
                 <div class="flex items-center gap-2 mb-1">
-                    <h4 class="font-bold text-lg text-on-surface">SVNIT Surat</h4>
+                    <h4 class="font-bold text-lg text-on-surface">{{ choice.college }}</h4>
                     <span class="text-on-surface-variant">—</span>
-                    <span class="font-bold text-primary">CSE</span>
+                    <span class="font-bold text-primary">{{ choice.branch }}</span>
                     <span class="material-symbols-outlined text-yellow-500 text-[20px] ml-1">star</span>
                 </div>
                 <p class="text-sm text-on-surface-variant flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[16px] text-green-600">verified</span>
-                    Reason: Highest ROI
+                    <span class="material-symbols-outlined text-[16px] text-green-600">{{ choice.icon }}</span>
+                    Reason: {{ choice.reason }} (Closing Rank: {{ choice.closing_rank }})
                 </p>
             </div>
             <div class="text-right">
-                <span class="block text-2xl font-black text-green-600">92%</span>
+                <span class="block text-2xl font-black {% if choice.match >= 75 %}text-green-600{% elif choice.match >= 40 %}text-secondary{% else %}text-tertiary{% endif %}">{{ choice.match }}%</span>
                 <span class="text-[10px] uppercase font-bold text-on-surface-variant tracking-wider">Match</span>
             </div>
         </div>
-
-        <!-- Choice 2 -->
-        <div class="flex items-center gap-6 p-6 bg-white border border-outline-variant/50 rounded-2xl hover:shadow-md hover:border-primary/30 transition-all group">
-            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-surface-container-high text-on-surface font-bold text-xl flex items-center justify-center border border-outline-variant/30 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                2
-            </div>
-            <div class="flex-grow">
-                <div class="flex items-center gap-2 mb-1">
-                    <h4 class="font-bold text-lg text-on-surface">NIT Surat</h4>
-                    <span class="text-on-surface-variant">—</span>
-                    <span class="font-bold text-primary">AI</span>
-                    <span class="material-symbols-outlined text-yellow-500 text-[20px] ml-1">star</span>
-                </div>
-                <p class="text-sm text-on-surface-variant flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[16px] text-blue-600">trending_up</span>
-                    Reason: Higher Placement
-                </p>
-            </div>
-            <div class="text-right">
-                <span class="block text-2xl font-black text-secondary">85%</span>
-                <span class="text-[10px] uppercase font-bold text-on-surface-variant tracking-wider">Match</span>
-            </div>
+        {% empty %}
+        <div class="p-8 text-center bg-white rounded-2xl border border-outline-variant text-on-surface-variant">
+            No recommendations match your current parameters. Try adjusting your rank or quota.
         </div>
-
-        <!-- Choice 3 -->
-        <div class="flex items-center gap-6 p-6 bg-white border border-outline-variant/50 rounded-2xl hover:shadow-md hover:border-primary/30 transition-all group">
-            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-surface-container-high text-on-surface font-bold text-xl flex items-center justify-center border border-outline-variant/30 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                3
-            </div>
-            <div class="flex-grow">
-                <div class="flex items-center gap-2 mb-1">
-                    <h4 class="font-bold text-lg text-on-surface">VNIT Nagpur</h4>
-                    <span class="text-on-surface-variant">—</span>
-                    <span class="font-bold text-primary">ECE</span>
-                    <span class="material-symbols-outlined text-yellow-500 text-[20px] ml-1">star</span>
-                </div>
-                <p class="text-sm text-on-surface-variant flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[16px] text-secondary">check_circle</span>
-                    Reason: High Admission Probability
-                </p>
-            </div>
-            <div class="text-right">
-                <span class="block text-2xl font-black text-on-tertiary-container">98%</span>
-                <span class="text-[10px] uppercase font-bold text-on-surface-variant tracking-wider">Match</span>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 </section>
 
@@ -135,55 +96,51 @@
         <h3 class="font-label-mono text-[15px] font-bold text-secondary uppercase tracking-widest">
             Compare Top Alternatives
         </h3>
-        <span class="text-sm text-on-surface-variant bg-surface-container px-3 py-1 rounded-full">Compare up to 4 colleges</span>
+        <span class="text-sm text-on-surface-variant bg-surface-container px-3 py-1 rounded-full">Compare recommended colleges</span>
     </div>
     
     <div class="overflow-x-auto bg-white rounded-2xl border border-outline-variant/50 shadow-sm">
         <table class="w-full text-left border-collapse">
             <thead>
                 <tr class="bg-surface-container-low border-b border-outline-variant/50">
-                    <th class="py-5 px-6 font-bold text-on-surface-variant uppercase text-xs tracking-widest w-1/4">Parameter</th>
-                    <th class="py-5 px-6 font-bold text-primary text-base text-center border-l border-outline-variant/30 w-1/4">SVNIT</th>
-                    <th class="py-5 px-6 font-bold text-primary text-base text-center border-l border-outline-variant/30 w-1/4">VNIT</th>
-                    <th class="py-5 px-6 font-bold text-primary text-base text-center border-l border-outline-variant/30 w-1/4">NIT Jaipur</th>
+                    <th class="py-5 px-6 font-bold text-on-surface-variant uppercase text-xs tracking-widest">Parameter</th>
+                    {% for col in strategy.comparison_colleges %}
+                    <th class="py-5 px-6 font-bold text-primary text-base text-center border-l border-outline-variant/30">{{ col.name }}</th>
+                    {% empty %}
+                    <th class="py-5 px-6 font-bold text-primary text-base text-center border-l border-outline-variant/30">No Colleges</th>
+                    {% endfor %}
                 </tr>
             </thead>
             <tbody class="divide-y divide-outline-variant/30">
                 <tr class="hover:bg-surface-container-low/30 transition-colors">
                     <td class="py-4 px-6 font-medium text-sm text-on-surface">Average Package</td>
-                    <td class="py-4 px-6 text-center border-l border-outline-variant/30"><span class="material-symbols-outlined text-green-600">check_circle</span></td>
-                    <td class="py-4 px-6 text-center border-l border-outline-variant/30"><span class="material-symbols-outlined text-green-600">check_circle</span></td>
-                    <td class="py-4 px-6 text-center border-l border-outline-variant/30"><span class="material-symbols-outlined text-green-600">check_circle</span></td>
+                    {% for col in strategy.comparison_colleges %}
+                    <td class="py-4 px-6 text-center border-l border-outline-variant/30 font-bold text-green-700">{{ col.avg_package }}</td>
+                    {% endfor %}
                 </tr>
                 <tr class="hover:bg-surface-container-low/30 transition-colors">
-                    <td class="py-4 px-6 font-medium text-sm text-on-surface">Highest Package</td>
-                    <td class="py-4 px-6 text-center border-l border-outline-variant/30"><span class="material-symbols-outlined text-green-600">check_circle</span></td>
-                    <td class="py-4 px-6 text-center border-l border-outline-variant/30"><span class="material-symbols-outlined text-green-600">check_circle</span></td>
-                    <td class="py-4 px-6 text-center border-l border-outline-variant/30"><span class="material-symbols-outlined text-green-600">check_circle</span></td>
+                    <td class="py-4 px-6 font-medium text-sm text-on-surface">Est. Course Fees</td>
+                    {% for col in strategy.comparison_colleges %}
+                    <td class="py-4 px-6 text-center border-l border-outline-variant/30 font-mono text-on-surface">{{ col.fees }}</td>
+                    {% endfor %}
                 </tr>
                 <tr class="hover:bg-surface-container-low/30 transition-colors">
-                    <td class="py-4 px-6 font-medium text-sm text-on-surface">Fees</td>
-                    <td class="py-4 px-6 text-center border-l border-outline-variant/30"><span class="material-symbols-outlined text-green-600">check_circle</span></td>
-                    <td class="py-4 px-6 text-center border-l border-outline-variant/30"><span class="material-symbols-outlined text-green-600">check_circle</span></td>
-                    <td class="py-4 px-6 text-center border-l border-outline-variant/30"><span class="material-symbols-outlined text-green-600">check_circle</span></td>
+                    <td class="py-4 px-6 font-medium text-sm text-on-surface">NIRF Rank</td>
+                    {% for col in strategy.comparison_colleges %}
+                    <td class="py-4 px-6 text-center border-l border-outline-variant/30 font-semibold text-primary">{{ col.nirf }}</td>
+                    {% endfor %}
                 </tr>
                 <tr class="hover:bg-surface-container-low/30 transition-colors">
-                    <td class="py-4 px-6 font-medium text-sm text-on-surface">Hostel</td>
-                    <td class="py-4 px-6 text-center border-l border-outline-variant/30"><span class="material-symbols-outlined text-green-600">check_circle</span></td>
-                    <td class="py-4 px-6 text-center border-l border-outline-variant/30"><span class="material-symbols-outlined text-green-600">check_circle</span></td>
-                    <td class="py-4 px-6 text-center border-l border-outline-variant/30"><span class="material-symbols-outlined text-green-600">check_circle</span></td>
+                    <td class="py-4 px-6 font-medium text-sm text-on-surface">ROI Score</td>
+                    {% for col in strategy.comparison_colleges %}
+                    <td class="py-4 px-6 text-center border-l border-outline-variant/30 font-bold text-secondary">{{ col.roi }}</td>
+                    {% endfor %}
                 </tr>
                 <tr class="hover:bg-surface-container-low/30 transition-colors">
-                    <td class="py-4 px-6 font-medium text-sm text-on-surface">ROI</td>
-                    <td class="py-4 px-6 text-center border-l border-outline-variant/30"><span class="material-symbols-outlined text-green-600">check_circle</span></td>
-                    <td class="py-4 px-6 text-center border-l border-outline-variant/30"><span class="material-symbols-outlined text-green-600">check_circle</span></td>
-                    <td class="py-4 px-6 text-center border-l border-outline-variant/30"><span class="material-symbols-outlined text-green-600">check_circle</span></td>
-                </tr>
-                <tr class="hover:bg-surface-container-low/30 transition-colors">
-                    <td class="py-4 px-6 font-medium text-sm text-on-surface">Closing Rank</td>
-                    <td class="py-4 px-6 text-center border-l border-outline-variant/30"><span class="material-symbols-outlined text-green-600">check_circle</span></td>
-                    <td class="py-4 px-6 text-center border-l border-outline-variant/30"><span class="material-symbols-outlined text-green-600">check_circle</span></td>
-                    <td class="py-4 px-6 text-center border-l border-outline-variant/30"><span class="material-symbols-outlined text-green-600">check_circle</span></td>
+                    <td class="py-4 px-6 font-medium text-sm text-on-surface">Historical Closing Rank</td>
+                    {% for col in strategy.comparison_colleges %}
+                    <td class="py-4 px-6 text-center border-l border-outline-variant/30 font-mono text-on-surface">{{ col.closing_rank }}</td>
+                    {% endfor %}
                 </tr>
             </tbody>
         </table>
@@ -194,9 +151,9 @@
 <section class="mb-12">
     <div class="flex items-center justify-between mb-6 border-l-4 border-on-tertiary-container pl-3">
         <h3 class="font-label-mono text-[15px] font-bold text-on-tertiary-container uppercase tracking-widest">
-            Closing Rank Trend (Last 5 Years)
+            Closing Rank Trend
         </h3>
-        <span class="text-sm text-on-surface-variant font-bold">SVNIT Surat CSE</span>
+        <span class="text-sm text-on-surface-variant font-bold">{{ trend_title }}</span>
     </div>
     
     <div class="bg-white p-8 rounded-2xl border border-outline-variant/50 shadow-sm relative w-full h-[400px]">
@@ -209,6 +166,9 @@
     document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('rankTrendChart').getContext('2d');
         
+        const labels = {{ trend_years_json|safe }};
+        const dataPoints = {{ trend_ranks_json|safe }};
+
         // Gradient for line chart
         const gradient = ctx.createLinearGradient(0, 0, 0, 400);
         gradient.addColorStop(0, 'rgba(0, 34, 148, 0.2)');
@@ -217,10 +177,10 @@
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['2021', '2022', '2023', '2024', '2025'],
+                labels: labels,
                 datasets: [{
                     label: 'Closing Rank',
-                    data: [5200, 4800, 4500, 4300, 4100],
+                    data: dataPoints,
                     borderColor: '#002294',
                     backgroundColor: gradient,
                     borderWidth: 3,
@@ -249,7 +209,7 @@
                         displayColors: false,
                         callbacks: {
                             label: function(context) {
-                                return 'Closing Rank: ' + context.parsed.y;
+                                return 'Closing Rank: ' + context.parsed.y.toLocaleString();
                             }
                         }
                     }
@@ -257,15 +217,16 @@
                 scales: {
                     y: {
                         reverse: true, // Lower rank is better
-                        min: 3500,
-                        max: 6000,
                         grid: {
                             color: 'rgba(196, 197, 216, 0.3)',
                             drawBorder: false,
                         },
                         ticks: {
                             font: { family: 'Inter', size: 12 },
-                            color: '#444655'
+                            color: '#444655',
+                            callback: function(value) {
+                                return value.toLocaleString();
+                            }
                         },
                         title: {
                             display: true,

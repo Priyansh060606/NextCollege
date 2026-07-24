@@ -29,30 +29,21 @@ SECRET_KEY = 'django-insecure-@^6e9yh-yy=fmw#6ljeb09edkggmj)s*j3!v9b8tc(qbm1vr71
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.messages',
     'django.contrib.staticfiles',
 
     # Third party apps
     'rest_framework',
     'django_filters',
-    'django.contrib.sites',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
 
     # Local apps
-    'accounts',
     'students',
     'colleges',
     'cutoffs',
@@ -69,11 +60,10 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 
 ROOT_URLCONF = 'NextCollege.urls'
 
@@ -85,8 +75,6 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
@@ -157,34 +145,4 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 50,
 }
 
-# Authentication
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-]
 
-SITE_ID = 1
-
-# Allauth Settings
-ACCOUNT_LOGIN_METHODS = {'email'}
-ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
-ACCOUNT_EMAIL_VERIFICATION = 'none'
-
-SOCIALACCOUNT_LOGIN_ON_GET = True
-
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        },
-        'APP': {
-            'client_id': os.getenv('GOOGLE_CLIENT_ID', 'YOUR_GOOGLE_CLIENT_ID'),
-            'secret': os.getenv('GOOGLE_CLIENT_SECRET', 'YOUR_GOOGLE_CLIENT_SECRET'),
-            'key': ''
-        }
-    }
-}

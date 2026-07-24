@@ -101,7 +101,7 @@
             </div>
             <div class="flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full border border-outline-variant/30">
                 <span class="material-symbols-outlined text-secondary text-base">tune</span>
-                <span class="font-label-md text-on-surface">{{ category }} • {{ gender }}</span>
+                <span class="font-label-md text-on-surface">{{ seat_type|default:category }} • {{ gender }}</span>
             </div>
             <div class="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-full border border-primary/20">
                 <span class="material-symbols-outlined text-primary text-base">school</span>
@@ -163,9 +163,9 @@
 <section class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
     <!-- Left: Category Tabs -->
     <div class="lg:col-span-3 space-y-3 sticky top-24">
-        <button class="w-full flex items-center justify-between p-6 rounded-2xl bg-white shadow-sm border border-outline-variant/30 hover:border-orange-500/50 transition-all text-left group category-pill" id="cat-dream" onclick="switchCategory('dream')">
+        <button class="w-full flex items-center justify-between p-6 rounded-2xl bg-white shadow-sm border border-outline-variant/30 hover:border-amber-500/50 transition-all text-left group category-pill" id="cat-dream" onclick="switchCategory('dream')">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600">
+                <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700">
                     <span class="material-symbols-outlined">rocket_launch</span>
                 </div>
                 <div>
@@ -174,9 +174,9 @@
                 </div>
             </div>
         </button>
-        <button class="w-full flex items-center justify-between p-6 rounded-2xl bg-white shadow-sm border border-outline-variant/30 hover:border-primary/50 transition-all text-left group category-pill active border-2 border-primary" id="cat-target" onclick="switchCategory('target')">
+        <button class="w-full flex items-center justify-between p-6 rounded-2xl bg-white shadow-sm border border-outline-variant/30 hover:border-blue-500/50 transition-all text-left group category-pill active border-2 border-blue-600" id="cat-target" onclick="switchCategory('target')">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center">
+                <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center">
                     <span class="material-symbols-outlined">location_on</span>
                 </div>
                 <div>
@@ -185,9 +185,9 @@
                 </div>
             </div>
         </button>
-        <button class="w-full flex items-center justify-between p-6 rounded-2xl bg-white shadow-sm border border-outline-variant/30 hover:border-green-500/50 transition-all text-left group category-pill" id="cat-safe" onclick="switchCategory('safe')">
+        <button class="w-full flex items-center justify-between p-6 rounded-2xl bg-white shadow-sm border border-outline-variant/30 hover:border-emerald-500/50 transition-all text-left group category-pill" id="cat-safe" onclick="switchCategory('safe')">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center text-green-600">
+                <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700">
                     <span class="material-symbols-outlined">verified_user</span>
                 </div>
                 <div>
@@ -206,8 +206,47 @@
 
     <!-- Right: College Cards -->
     <div class="lg:col-span-9">
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex flex-col gap-4 mb-6">
             <h3 class="font-headline-sm text-xl font-bold text-on-surface" id="section-title">Target Colleges — Round {{ selected_round }}</h3>
+            <div class="flex flex-wrap items-center gap-3">
+                <!-- State Selection Dropdown -->
+                <div class="relative" id="state-filter-wrapper">
+                    <button type="button" onclick="toggleDropdown('state')" class="flex items-center gap-2 px-4 py-2.5 bg-white border border-outline-variant/30 rounded-xl text-sm font-semibold text-on-surface hover:border-primary/50 hover:shadow-md transition-all">
+                        <span class="material-symbols-outlined text-primary text-base">location_on</span>
+                        <span id="state-filter-label">All States</span>
+                        <span class="material-symbols-outlined text-on-surface-variant text-base">expand_more</span>
+                    </button>
+                    <div id="state-dropdown" class="hidden absolute left-0 top-full mt-2 w-72 bg-white border border-outline-variant/30 rounded-xl shadow-2xl z-50 overflow-hidden">
+                        <div class="p-2 border-b border-outline-variant/20">
+                            <input type="text" id="state-search" placeholder="Search state..." oninput="filterDropdownItems('state')" class="w-full px-3 py-2 bg-surface-container-low border-none rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/30" />
+                        </div>
+                        <div class="max-h-52 overflow-y-auto p-1" id="state-options">
+                            <div class="px-3 py-2 rounded-lg cursor-pointer hover:bg-primary/5 text-sm font-medium text-primary transition-colors" onclick="selectFilter('state','')">All States</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- College Selection Dropdown -->
+                <div class="relative" id="college-filter-wrapper">
+                    <button type="button" onclick="toggleDropdown('college')" class="flex items-center gap-2 px-4 py-2.5 bg-white border border-outline-variant/30 rounded-xl text-sm font-semibold text-on-surface hover:border-primary/50 hover:shadow-md transition-all">
+                        <span class="material-symbols-outlined text-primary text-base">school</span>
+                        <span id="college-filter-label">All Colleges</span>
+                        <span class="material-symbols-outlined text-on-surface-variant text-base">expand_more</span>
+                    </button>
+                    <div id="college-dropdown" class="hidden absolute left-0 top-full mt-2 w-96 bg-white border border-outline-variant/30 rounded-xl shadow-2xl z-50 overflow-hidden">
+                        <div class="p-2 border-b border-outline-variant/20">
+                            <input type="text" id="college-search" placeholder="Search college..." oninput="filterDropdownItems('college')" class="w-full px-3 py-2 bg-surface-container-low border-none rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/30" />
+                        </div>
+                        <div class="max-h-52 overflow-y-auto p-1" id="college-options">
+                            <div class="px-3 py-2 rounded-lg cursor-pointer hover:bg-primary/5 text-sm font-medium text-primary transition-colors" onclick="selectFilter('college','')">All Colleges</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Active Filters Clear -->
+                <button type="button" id="clear-filters-btn" class="hidden items-center gap-1.5 px-3 py-2 bg-red-50 border border-red-200/50 rounded-xl text-xs font-bold text-red-600 hover:bg-red-100 transition-all" onclick="clearAllFilters()">
+                    <span class="material-symbols-outlined text-sm">close</span>
+                    Clear Filters
+                </button>
+            </div>
         </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="college-container">
@@ -215,6 +254,8 @@
             <div class="college-card group bg-white rounded-2xl border border-outline-variant/30 overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 fade-in" 
                  data-category="{% if result.prob < 40 %}dream{% elif result.prob < 75 %}target{% else %}safe{% endif %}"
                  data-round="{{ result.round_number }}"
+                 data-college="{{ result.college_name }}"
+                 data-state="{{ result.college_state|default:'' }}"
                  style="animation-delay: {{ forloop.counter0|divisibleby:1 }}ms">
                 <div class="p-6">
                     <div class="flex justify-between items-start mb-3">
@@ -229,10 +270,10 @@
                             <p class="text-on-surface-variant text-[13px]">{{ result.branch_name }}</p>
                         </div>
                         <div class="text-right shrink-0">
-                            <div class="flex items-center justify-center w-12 h-12 rounded-full border-[3px] {% if result.prob < 40 %}border-error/20 text-error{% elif result.prob < 75 %}border-secondary/20 text-secondary{% else %}border-on-tertiary-container/20 text-on-tertiary-container{% endif %} relative">
+                            <div class="flex items-center justify-center w-12 h-12 rounded-full border-[3px] {% if result.prob < 40 %}border-amber-200 text-amber-600{% elif result.prob < 75 %}border-blue-200 text-blue-600{% else %}border-emerald-200 text-emerald-600{% endif %} relative">
                                 <span class="text-[14px] font-bold">{{ result.prob }}%</span>
                                 <svg class="absolute inset-0 -rotate-90 w-full h-full" viewbox="0 0 36 36">
-                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" class="{% if result.prob < 40 %}stroke-error{% elif result.prob < 75 %}stroke-secondary{% else %}stroke-on-tertiary-container{% endif %}" stroke-dasharray="{{ result.prob }}, 100" stroke-width="3"></path>
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" class="{% if result.prob < 40 %}stroke-amber-500{% elif result.prob < 75 %}stroke-blue-500{% else %}stroke-emerald-500{% endif %}" stroke-dasharray="{{ result.prob }}, 100" stroke-width="3"></path>
                                 </svg>
                             </div>
                         </div>
@@ -249,10 +290,10 @@
                             </span>
                             {% endif %}
                         </div>
-                        <span class="text-[11px] px-2 py-0.5 rounded-full font-bold 
-                            {% if result.status == 'Safe' %}bg-green-50 text-green-700
-                            {% elif result.status == 'Target' %}bg-blue-50 text-blue-700
-                            {% else %}bg-orange-50 text-orange-700{% endif %}">
+                        <span class="text-[11px] px-2.5 py-0.5 rounded-full font-bold border 
+                            {% if result.status == 'Safe' %}bg-emerald-50 text-emerald-700 border-emerald-200/60
+                            {% elif result.status == 'Target' %}bg-blue-50 text-blue-700 border-blue-200/60
+                            {% else %}bg-amber-50 text-amber-700 border-amber-200/60{% endif %}">
                             {{ result.status }}
                         </span>
                     </div>
@@ -273,21 +314,120 @@
 
 {% block extra_js %}
 <script>
-    // Round-wise data passed from Django
     const roundData = {{ round_data_json|safe }};
     const studentRank = {{ rank }};
-    
+    const collegeNames = {{ college_names_json|safe }};
+    const stateNames = {{ state_names_json|safe }};
+
+    let activeStateFilter = '';
+    let activeCollegeFilter = '';
+
+    // Populate dropdown options on load
+    document.addEventListener('DOMContentLoaded', () => {
+        populateDropdownOptions('state', stateNames);
+        populateDropdownOptions('college', collegeNames);
+
+        const cards = document.querySelectorAll('.college-card');
+        let counts = {dream: 0, target: 0, safe: 0};
+        cards.forEach(card => {
+            const cat = card.dataset.category;
+            if (counts[cat] !== undefined) counts[cat]++;
+        });
+        updateCounts(counts);
+        let defaultCat = counts.target > 0 ? 'target' : (counts.safe > 0 ? 'safe' : (counts.dream > 0 ? 'dream' : 'all'));
+        switchCategory(defaultCat);
+    });
+
+    // Close dropdowns on outside click
+    document.addEventListener('click', (e) => {
+        ['state', 'college'].forEach(type => {
+            const wrapper = document.getElementById(`${type}-filter-wrapper`);
+            if (wrapper && !wrapper.contains(e.target)) {
+                document.getElementById(`${type}-dropdown`).classList.add('hidden');
+            }
+        });
+    });
+
+    function populateDropdownOptions(type, items) {
+        const container = document.getElementById(`${type}-options`);
+        const allLabel = type === 'state' ? 'All States' : 'All Colleges';
+        let html = `<div class="px-3 py-2 rounded-lg cursor-pointer hover:bg-primary/5 text-sm font-medium text-primary transition-colors" onclick="selectFilter('${type}','')">${allLabel}</div>`;
+        items.forEach(item => {
+            const shortLabel = type === 'college' ? (item.length > 45 ? item.substring(0, 42) + '...' : item) : item;
+            html += `<div class="px-3 py-2 rounded-lg cursor-pointer hover:bg-primary/5 text-sm text-on-surface transition-colors dropdown-item" data-value="${item}" onclick="selectFilter('${type}','${item.replace(/'/g, "\\'")}')">${shortLabel}</div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function toggleDropdown(type) {
+        const dd = document.getElementById(`${type}-dropdown`);
+        const otherType = type === 'state' ? 'college' : 'state';
+        document.getElementById(`${otherType}-dropdown`).classList.add('hidden');
+        dd.classList.toggle('hidden');
+        if (!dd.classList.contains('hidden')) {
+            document.getElementById(`${type}-search`).focus();
+        }
+    }
+
+    function filterDropdownItems(type) {
+        const query = document.getElementById(`${type}-search`).value.toLowerCase();
+        const items = document.querySelectorAll(`#${type}-options .dropdown-item`);
+        items.forEach(item => {
+            item.style.display = item.dataset.value.toLowerCase().includes(query) ? '' : 'none';
+        });
+    }
+
+    function selectFilter(type, value) {
+        if (type === 'state') {
+            activeStateFilter = value;
+            document.getElementById('state-filter-label').textContent = value || 'All States';
+        } else {
+            activeCollegeFilter = value;
+            document.getElementById('college-filter-label').textContent = value ? (value.length > 30 ? value.substring(0, 27) + '...' : value) : 'All Colleges';
+        }
+        document.getElementById(`${type}-dropdown`).classList.add('hidden');
+        document.getElementById(`${type}-search`).value = '';
+        filterDropdownItems(type);
+
+        const clearBtn = document.getElementById('clear-filters-btn');
+        if (activeStateFilter || activeCollegeFilter) {
+            clearBtn.classList.remove('hidden');
+            clearBtn.classList.add('flex');
+        } else {
+            clearBtn.classList.add('hidden');
+            clearBtn.classList.remove('flex');
+        }
+        applyAllFilters();
+    }
+
+    function clearAllFilters() {
+        activeStateFilter = '';
+        activeCollegeFilter = '';
+        document.getElementById('state-filter-label').textContent = 'All States';
+        document.getElementById('college-filter-label').textContent = 'All Colleges';
+        document.getElementById('clear-filters-btn').classList.add('hidden');
+        document.getElementById('clear-filters-btn').classList.remove('flex');
+        applyAllFilters();
+    }
+
+    function applyAllFilters() {
+        const activeCat = document.querySelector('.category-pill.active');
+        const catType = activeCat ? activeCat.id.replace('cat-', '') : 'all';
+        const cards = document.querySelectorAll('.college-card');
+        cards.forEach(card => {
+            const matchCat = catType === 'all' || card.dataset.category === catType;
+            const matchState = !activeStateFilter || card.dataset.state === activeStateFilter;
+            const matchCollege = !activeCollegeFilter || card.dataset.college === activeCollegeFilter;
+            card.classList.toggle('hidden', !(matchCat && matchState && matchCollege));
+        });
+    }
+
     function switchRound(roundNum) {
-        // Update round tabs
         document.querySelectorAll('.round-tab').forEach(tab => {
             tab.classList.remove('active');
-            const label = tab.querySelector('p');
-            if (label) label.classList.remove('text-white/80');
         });
-        const activeTab = document.querySelector(`[data-round="${roundNum}"]`);
-        activeTab.classList.add('active');
+        document.querySelector(`[data-round="${roundNum}"]`).classList.add('active');
 
-        // Rebuild college cards from roundData
         const container = document.getElementById('college-container');
         const data = roundData[roundNum] || [];
         
@@ -309,13 +449,13 @@
         data.forEach((r, i) => {
             const cat = r.prob < 40 ? 'dream' : (r.prob < 75 ? 'target' : 'safe');
             counts[cat]++;
-            const statusClass = r.prob >= 75 ? 'bg-green-50 text-green-700' : (r.prob >= 40 ? 'bg-blue-50 text-blue-700' : 'bg-orange-50 text-orange-700');
-            const borderClass = r.prob >= 75 ? 'border-on-tertiary-container/20 text-on-tertiary-container' : (r.prob >= 40 ? 'border-secondary/20 text-secondary' : 'border-error/20 text-error');
-            const strokeClass = r.prob >= 75 ? 'stroke-on-tertiary-container' : (r.prob >= 40 ? 'stroke-secondary' : 'stroke-error');
+            const statusClass = r.prob >= 75 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : (r.prob >= 40 ? 'bg-blue-50 text-blue-700 border border-blue-200/60' : 'bg-amber-50 text-amber-700 border border-amber-200/60');
+            const borderClass = r.prob >= 75 ? 'border-emerald-200 text-emerald-600' : (r.prob >= 40 ? 'border-blue-200 text-blue-600' : 'border-amber-200 text-amber-600');
+            const strokeClass = r.prob >= 75 ? 'stroke-emerald-500' : (r.prob >= 40 ? 'stroke-blue-500' : 'stroke-amber-500');
 
             html += `
                 <div class="college-card group bg-white rounded-2xl border border-outline-variant/30 overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 fade-in"
-                     data-category="${cat}" style="animation-delay: ${i * 30}ms">
+                     data-category="${cat}" data-college="${r.college_name || ''}" data-state="${r.college_state || ''}" style="animation-delay: ${i * 30}ms">
                     <div class="p-6">
                         <div class="flex justify-between items-start mb-3">
                             <div class="pr-2 flex-grow">
@@ -352,20 +492,13 @@
         container.innerHTML = html;
         updateCounts(counts);
 
-        // Update summary
         document.getElementById('round-analysis-title').innerText = `Round ${roundNum} Analysis`;
         document.getElementById('round-summary').innerHTML = `
             Showing <span class="font-bold text-primary">${data.length}</span> college options in Round ${roundNum} for rank <span class="font-bold">${studentRank}</span>.
             ${roundNum > 1 ? 'Cutoffs have shifted compared to earlier rounds — check for new opportunities.' : 'This is the initial round with the tightest cutoffs.'}
         `;
         document.getElementById('section-title').innerText = `Target Colleges — Round ${roundNum}`;
-
-        // Apply current category filter
-        const activeCat = document.querySelector('.category-pill.active');
-        if (activeCat) {
-            const catType = activeCat.id.replace('cat-', '');
-            filterByCategory(catType);
-        }
+        applyAllFilters();
     }
 
     function updateCounts(counts) {
@@ -374,65 +507,35 @@
         document.getElementById('safe-count').innerText = `${counts.safe} colleges`;
     }
 
-    function filterByCategory(type) {
-        const cards = document.querySelectorAll('.college-card');
-        cards.forEach(card => {
-            if (type === 'all' || card.dataset.category === type) {
-                card.classList.remove('hidden');
-            } else {
-                card.classList.add('hidden');
-            }
-        });
-    }
+    function filterByCategory(type) { applyAllFilters(); }
 
     function switchCategory(type) {
-        // Update pills
         document.querySelectorAll('.category-pill').forEach(pill => {
-            pill.classList.remove('active', 'border-2', 'border-primary');
+            pill.classList.remove('active', 'border-2', 'border-amber-500', 'border-blue-600', 'border-emerald-500');
             const iconDiv = pill.querySelector('.flex > div:first-child');
             if (iconDiv) {
-                iconDiv.classList.remove('bg-orange-500', 'bg-primary', 'bg-green-500', 'text-white');
-                if (pill.id === 'cat-dream') iconDiv.classList.add('bg-orange-100', 'text-orange-600');
-                if (pill.id === 'cat-target') iconDiv.classList.add('bg-primary-container/10', 'text-primary');
-                if (pill.id === 'cat-safe') iconDiv.classList.add('bg-green-100', 'text-green-600');
+                iconDiv.classList.remove('bg-amber-500', 'bg-blue-600', 'bg-emerald-500', 'bg-amber-100', 'bg-blue-100', 'bg-emerald-100', 'text-amber-700', 'text-blue-700', 'text-emerald-700', 'text-white');
+                if (pill.id === 'cat-dream') iconDiv.classList.add('bg-amber-100', 'text-amber-700');
+                if (pill.id === 'cat-target') iconDiv.classList.add('bg-blue-100', 'text-blue-700');
+                if (pill.id === 'cat-safe') iconDiv.classList.add('bg-emerald-100', 'text-emerald-700');
             }
         });
-
         if (type !== 'all') {
             const activePill = document.getElementById(`cat-${type}`);
-            activePill.classList.add('active', 'border-2', 'border-primary');
+            const activeBorder = type === 'dream' ? 'border-amber-500' : (type === 'target' ? 'border-blue-600' : 'border-emerald-500');
+            activePill.classList.add('active', 'border-2', activeBorder);
             const activeIconDiv = activePill.querySelector('.flex > div:first-child');
             if (activeIconDiv) {
-                activeIconDiv.classList.remove('bg-orange-100', 'bg-primary-container/10', 'bg-green-100', 'text-orange-600', 'text-primary', 'text-green-600');
-                if (type === 'dream') activeIconDiv.classList.add('bg-orange-500', 'text-white');
-                if (type === 'target') activeIconDiv.classList.add('bg-primary', 'text-white');
-                if (type === 'safe') activeIconDiv.classList.add('bg-green-500', 'text-white');
+                activeIconDiv.classList.remove('bg-amber-100', 'bg-blue-100', 'bg-emerald-100', 'text-amber-700', 'text-blue-700', 'text-emerald-700');
+                if (type === 'dream') activeIconDiv.classList.add('bg-amber-500', 'text-white');
+                if (type === 'target') activeIconDiv.classList.add('bg-blue-600', 'text-white');
+                if (type === 'safe') activeIconDiv.classList.add('bg-emerald-500', 'text-white');
             }
         }
-
-        filterByCategory(type);
-
-        const titles = {
-            dream: "Dream Colleges (Ambitious)",
-            target: "Target Colleges for You",
-            safe: "Safe Colleges (High Probability)",
-            all: "All Colleges"
-        };
+        applyAllFilters();
+        const titles = { dream: "Dream Colleges (Ambitious)", target: "Target Colleges for You", safe: "Safe Colleges (High Probability)", all: "All Colleges" };
         const roundNum = document.querySelector('.round-tab.active')?.dataset.round || 1;
         document.getElementById('section-title').innerText = `${titles[type]} — Round ${roundNum}`;
     }
-
-    // Initialize
-    document.addEventListener('DOMContentLoaded', () => {
-        switchCategory('target');
-        // Count initial results
-        const cards = document.querySelectorAll('.college-card');
-        let counts = {dream: 0, target: 0, safe: 0};
-        cards.forEach(card => {
-            const cat = card.dataset.category;
-            if (counts[cat] !== undefined) counts[cat]++;
-        });
-        updateCounts(counts);
-    });
 </script>
 {% endblock %}

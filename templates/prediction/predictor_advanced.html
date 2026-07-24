@@ -22,20 +22,6 @@
         cursor: pointer;
         border: 2px solid white;
         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    .tier-chip {
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
-    .tier-chip:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(130, 29, 218, 0.15);
-    }
-    .tier-chip input:checked + span {
-        background: linear-gradient(135deg, #821dda, #9c42f4);
-        color: white;
-        border-color: #821dda;
-    }
 </style>
 {% endblock %}
 
@@ -76,8 +62,8 @@
                         </div>
                     </div>
                     <div class="space-y-2">
-                        <label class="font-label-md text-on-surface ml-1 font-semibold">Category *</label>
-                        <select name="category" class="w-full px-6 py-4 bg-surface-bright border border-outline-variant rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent transition-all outline-none appearance-none">
+                        <label class="font-label-md text-on-surface ml-1 font-semibold">Seat Type *</label>
+                        <select name="category" id="seat-type-select" class="w-full px-6 py-4 bg-surface-bright border border-outline-variant rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent transition-all outline-none appearance-none">
                             {% for cat in categories %}
                             <option value="{{ cat }}">{{ cat }}</option>
                             {% empty %}
@@ -88,6 +74,7 @@
                             <option value="EWS">EWS</option>
                             {% endfor %}
                         </select>
+                        <input type="hidden" name="seat_type" id="seat-type-hidden" value="OPEN">
                     </div>
                     
                     <div class="space-y-2">
@@ -105,9 +92,12 @@
                         <label class="font-label-md text-on-surface ml-1 font-semibold">Home State</label>
                         <input type="text" name="state" placeholder="e.g. Maharashtra" class="w-full px-6 py-4 bg-surface-bright border border-outline-variant rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent transition-all outline-none" />
                     </div>
-                    <div class="space-y-2 md:col-span-2">
+                    <div class="space-y-2 md:col-span-2 relative">
                         <label class="font-label-md text-on-surface ml-1 font-semibold">Preferred Branch (Optional)</label>
-                        <input type="text" name="branch" placeholder="e.g. Computer Science, Electrical, Mechanical" class="w-full px-6 py-4 bg-surface-bright border border-outline-variant rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent transition-all outline-none" />
+                        <div class="relative">
+                            <input type="text" name="branch" id="branch-input" autocomplete="off" placeholder="e.g. Computer Science, Electrical, Mechanical" class="w-full px-6 py-4 bg-surface-bright border border-outline-variant rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent transition-all outline-none" />
+                            <div id="branch-dropdown" class="hidden absolute left-0 right-0 mt-1 max-h-60 overflow-y-auto bg-white border border-outline-variant rounded-lg shadow-xl z-50"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -116,19 +106,19 @@
                     <label class="font-label-md text-on-surface ml-1 font-semibold">IIT Tier Filter</label>
                     <p class="text-xs text-on-surface-variant ml-1 -mt-1">Select which IIT tiers to include in your predictions</p>
                     <div class="flex flex-wrap gap-3">
-                        <label class="tier-chip flex items-center gap-2 px-4 py-2.5 bg-surface-bright border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-high transition-all">
+                        <label class="flex items-center gap-2 px-4 py-2.5 bg-surface-bright border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-high transition-all">
                             <input type="checkbox" name="tier_top" value="1" checked class="accent-secondary w-4 h-4">
                             <span class="text-sm font-medium text-on-surface flex items-center gap-1.5">
                                 <span class="text-base">🏆</span> Top IITs
                             </span>
                         </label>
-                        <label class="tier-chip flex items-center gap-2 px-4 py-2.5 bg-surface-bright border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-high transition-all">
+                        <label class="flex items-center gap-2 px-4 py-2.5 bg-surface-bright border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-high transition-all">
                             <input type="checkbox" name="tier_mid" value="1" checked class="accent-secondary w-4 h-4">
                             <span class="text-sm font-medium text-on-surface flex items-center gap-1.5">
                                 <span class="text-base">⭐</span> Mid-tier IITs
                             </span>
                         </label>
-                        <label class="tier-chip flex items-center gap-2 px-4 py-2.5 bg-surface-bright border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-high transition-all">
+                        <label class="flex items-center gap-2 px-4 py-2.5 bg-surface-bright border border-outline-variant rounded-lg cursor-pointer hover:bg-surface-container-high transition-all">
                             <input type="checkbox" name="tier_new" value="1" checked class="accent-secondary w-4 h-4">
                             <span class="text-sm font-medium text-on-surface flex items-center gap-1.5">
                                 <span class="text-base">✨</span> New IITs
@@ -246,6 +236,16 @@
 
 {% block extra_js %}
 <script>
+    // Sync seat_type hidden field with category select
+    const seatTypeSelect = document.getElementById('seat-type-select');
+    const seatTypeHidden = document.getElementById('seat-type-hidden');
+    if (seatTypeSelect && seatTypeHidden) {
+        seatTypeHidden.value = seatTypeSelect.value;
+        seatTypeSelect.addEventListener('change', () => {
+            seatTypeHidden.value = seatTypeSelect.value;
+        });
+    }
+
     const predictBtn = document.querySelector('.submit-btn');
     if (predictBtn) {
         predictBtn.addEventListener('mousedown', () => {
@@ -258,5 +258,89 @@
             predictBtn.style.transform = 'scale(1)';
         });
     }
+
+    // Autocomplete implementation
+    const branches = JSON.parse('{{ branches_json|escapejs }}');
+    const branchInput = document.getElementById('branch-input');
+    const branchDropdown = document.getElementById('branch-dropdown');
+    let activeIndex = -1;
+
+    function renderDropdown(filteredList) {
+        if (filteredList.length === 0) {
+            branchDropdown.classList.add('hidden');
+            return;
+        }
+        
+        branchDropdown.innerHTML = '';
+        filteredList.forEach((item, idx) => {
+            const div = document.createElement('div');
+            div.className = 'px-6 py-3 hover:bg-surface-container-high cursor-pointer font-body-base text-sm transition-colors text-on-surface border-b border-outline-variant/30 last:border-0';
+            div.textContent = item;
+            div.dataset.index = idx;
+            
+            div.addEventListener('click', () => {
+                branchInput.value = item;
+                branchDropdown.classList.add('hidden');
+                activeIndex = -1;
+            });
+            branchDropdown.appendChild(div);
+        });
+        branchDropdown.classList.remove('hidden');
+    }
+
+    function filterBranches() {
+        const query = branchInput.value.toLowerCase().trim();
+        if (query.length === 0) {
+            renderDropdown(branches.slice(0, 30));
+            return;
+        }
+        const filtered = branches.filter(b => b.toLowerCase().includes(query)).slice(0, 30);
+        renderDropdown(filtered);
+    }
+
+    branchInput.addEventListener('input', () => {
+        activeIndex = -1;
+        filterBranches();
+    });
+
+    branchInput.addEventListener('focus', () => {
+        activeIndex = -1;
+        filterBranches();
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!branchInput.contains(e.target) && !branchDropdown.contains(e.target)) {
+            branchDropdown.classList.add('hidden');
+            activeIndex = -1;
+        }
+    });
+
+    branchInput.addEventListener('keydown', (e) => {
+        const items = branchDropdown.querySelectorAll('div');
+        if (items.length === 0) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (activeIndex < items.length - 1) {
+                if (activeIndex >= 0) items[activeIndex].classList.remove('bg-surface-container-highest');
+                activeIndex++;
+                items[activeIndex].classList.add('bg-surface-container-highest');
+                items[activeIndex].scrollIntoView({ block: 'nearest' });
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (activeIndex > 0) {
+                items[activeIndex].classList.remove('bg-surface-container-highest');
+                activeIndex--;
+                items[activeIndex].classList.add('bg-surface-container-highest');
+                items[activeIndex].scrollIntoView({ block: 'nearest' });
+            }
+        } else if (e.key === 'Enter') {
+            if (activeIndex >= 0 && activeIndex < items.length) {
+                e.preventDefault();
+                items[activeIndex].click();
+            }
+        }
+    });
 </script>
 {% endblock %}

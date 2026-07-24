@@ -1,7 +1,7 @@
 from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import College, Branch, SeatMatrix
-from .serializers import CollegeSerializer, BranchSerializer, SeatMatrixSerializer
+from .models import College, Branch
+from .serializers import CollegeSerializer, BranchSerializer
 
 class CollegeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = College.objects.all().order_by('name')
@@ -15,9 +15,3 @@ class BranchViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = BranchSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
-
-class SeatMatrixViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = SeatMatrix.objects.all().select_related('college', 'branch')
-    serializer_class = SeatMatrixSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['college', 'branch', 'category', 'quota']

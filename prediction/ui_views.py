@@ -14,20 +14,6 @@ from datetime import datetime
 from django.db.models import Q
 
 
-class LoginView(View):
-    def get(self, request):
-        return render(request, 'accounts/login.html', {'active_page': 'login'})
-    def post(self, request):
-        # Dummy authentication for now
-        return redirect('predict')
-
-class RegisterView(View):
-    def get(self, request):
-        return render(request, 'accounts/register.html', {'active_page': 'register'})
-    def post(self, request):
-        # Dummy registration for now
-        return redirect('predict')
-
 class HomeView(View):
     def get(self, request):
         total_colleges = College.objects.count()
@@ -79,10 +65,26 @@ class MainsPredictorView(View):
     def get(self, request):
         categories = Cutoff.objects.values_list('category', flat=True).distinct().order_by('category')
         seat_pools = Cutoff.objects.values_list('seat_pool', flat=True).distinct().order_by('seat_pool')
+        
+        iit_q = (
+            Q(college__name__icontains='Indian Institute of Technology') |
+            Q(college__name__icontains='Indian Institute  of Technology')
+        ) & ~Q(college__name__icontains='Information Technology') & ~Q(college__name__icontains='Carpet') & ~Q(college__name__icontains='Handloom') & ~Q(college__name__icontains='Engineering Science')
+        
+        branches = list(
+            Cutoff.objects.filter(~iit_q)
+            .values_list('branch__name', flat=True)
+            .distinct()
+            .order_by('branch__name')
+        )
+        
+        import json
         return render(request, 'prediction/predictor_mains.html', {
             'active_page': 'predict',
             'categories': categories,
             'seat_pools': seat_pools,
+            'branches': branches,
+            'branches_json': json.dumps(branches),
         })
 
 
@@ -96,11 +98,27 @@ class AdvancedPredictorView(View):
             Q(name__icontains='Indian Institute  of Technology')
         ) & ~Q(name__icontains='Information Technology') & ~Q(name__icontains='Carpet') & ~Q(name__icontains='Handloom') & ~Q(name__icontains='Engineering Science')
         iit_count = College.objects.filter(iit_q).count()
+        
+        iit_cutoff_q = (
+            Q(college__name__icontains='Indian Institute of Technology') |
+            Q(college__name__icontains='Indian Institute  of Technology')
+        ) & ~Q(college__name__icontains='Information Technology') & ~Q(college__name__icontains='Carpet') & ~Q(college__name__icontains='Handloom') & ~Q(college__name__icontains='Engineering Science')
+        
+        branches = list(
+            Cutoff.objects.filter(iit_cutoff_q)
+            .values_list('branch__name', flat=True)
+            .distinct()
+            .order_by('branch__name')
+        )
+        
+        import json
         return render(request, 'prediction/predictor_advanced.html', {
             'active_page': 'predict',
             'categories': categories,
             'seat_pools': seat_pools,
             'iit_count': iit_count,
+            'branches': branches,
+            'branches_json': json.dumps(branches),
         })
 
 
@@ -346,6 +364,50 @@ class _RoundWiseResultBase(View):
                 return 'Mid'
         return 'New'
 
+    # Branch synonym/expansion map for smarter matching
+    BRANCH_EXPANSIONS = {
+        'computer engineering': ['Computer Engineering', 'Computer Science'],
+        'computer science': ['Computer Science', 'Computer Engineering'],
+        'cse': ['Computer Science', 'Computer Engineering'],
+        'information technology': ['Information Technology'],
+        'it': ['Information Technology'],
+        'electronics and communication': ['Electronics and Communication', 'Electronics & Communication', 'ECE'],
+        'ece': ['Electronics and Communication', 'Electronics & Communication'],
+        'electrical engineering': ['Electrical Engineering', 'Electrical and Electronics'],
+        'eee': ['Electrical and Electronics', 'Electrical Engineering'],
+        'mechanical engineering': ['Mechanical Engineering', 'Mechanical'],
+        'civil engineering': ['Civil Engineering', 'Civil'],
+        'chemical engineering': ['Chemical Engineering', 'Chemical'],
+        'aerospace engineering': ['Aerospace Engineering', 'Aerospace'],
+        'biotechnology': ['Biotechnology', 'Bio Technology'],
+        'mathematics and computing': ['Mathematics and Computing', 'Mathematics'],
+        'data science': ['Data Science', 'Artificial Intelligence'],
+        'artificial intelligence': ['Artificial Intelligence', 'Data Science', 'AI'],
+    }
+
+    def _expand_branch_query(self, branch_pref):
+        """Expand a branch preference into a broader Q filter matching related branches."""
+        if not branch_pref:
+            return None
+        
+        normalized = branch_pref.strip().lower()
+        
+        # Check if we have explicit expansions for this branch
+        expansions = None
+        for key, values in self.BRANCH_EXPANSIONS.items():
+            if key in normalized or normalized in key:
+                expansions = values
+                break
+        
+        if expansions:
+            branch_q = Q()
+            for exp in expansions:
+                branch_q |= Q(branch__name__icontains=exp)
+            return branch_q
+        else:
+            # Default: just use icontains on the original preference
+            return Q(branch__name__icontains=branch_pref)
+
     def _get_college_filter(self, exam_type, request=None):
         """Return a Q filter to include/exclude colleges based on exam type."""
         iit_q = (
@@ -403,18 +465,48 @@ class _RoundWiseResultBase(View):
                 return exclude_iit & inst_filters
             return exclude_iit
 
-    def _build_round_wise_results(self, student_rank, category, gender, state, branch_pref, exam_type, request=None):
-        """Build prediction results for all 6 rounds."""
+    def _build_round_wise_results(self, student_rank, category, gender, state, branch_pref, exam_type, request=None, seat_type=None):
+        """Build prediction results for all 6 rounds.
+        
+        Args:
+            seat_type: The seat type / category (OPEN, OBC-NCL, SC, ST, EWS, etc.)
+                       Falls back to `category` if not provided.
+        """
+        # Use seat_type if provided, otherwise fall back to category
+        effective_category = seat_type if seat_type else category
+        
         latest_year = Cutoff.objects.aggregate(Max('year'))['year__max'] or 2025
         
-        lower_bound = max(1, int(student_rank * 0.3))
+        info_tech_fallback = False
+        original_branch_pref = branch_pref
+        if exam_type == 'advanced' and branch_pref:
+            normalized = branch_pref.strip().lower()
+            if normalized in ['information technology', 'it', 'info tech', 'infotech', 'information tech']:
+                branch_pref = 'Computer Science'
+                info_tech_fallback = True
+
+        # Build branch filter using smart expansion
+        branch_filter = self._expand_branch_query(branch_pref)
+
+        # ---- Determine the closing rank search range ----
+        # For excellent ranks (< 500), cast a very wide net
+        # For good ranks (< 5000), use a generous multiplier
+        # For average ranks, use moderate multiplier
         if branch_pref:
-            upper_bound = max(int(student_rank * 100), 200000)
+            # With a branch filter, always cast wide to catch all colleges offering that branch
+            upper_bound = max(int(student_rank * 200), 300000)
         elif exam_type == 'advanced':
-            # IIT closing ranks can be very high even for top rankers (many branches)
-            upper_bound = max(int(student_rank * 3.5), 50000)
+            upper_bound = max(int(student_rank * 5), 50000)
         else:
-            upper_bound = max(int(student_rank * 3.5), 10000)
+            # Mains without branch: wider range for low ranks
+            if student_rank <= 500:
+                upper_bound = max(int(student_rank * 100), 200000)
+            elif student_rank <= 5000:
+                upper_bound = max(int(student_rank * 20), 100000)
+            else:
+                upper_bound = max(int(student_rank * 5), 50000)
+        
+        lower_bound = max(1, int(student_rank * 0.3))
 
         college_filter = self._get_college_filter(exam_type, request)
         
@@ -435,7 +527,7 @@ class _RoundWiseResultBase(View):
         for round_num in available_rounds:
             query = Q(
                 year=latest_year,
-                category=category,
+                category=effective_category,
                 seat_pool=gender,
                 round_number=round_num,
                 closing_rank__gte=lower_bound,
@@ -455,14 +547,15 @@ class _RoundWiseResultBase(View):
 
             candidates = Cutoff.objects.filter(query).select_related('college', 'branch').order_by('closing_rank')
 
-            if branch_pref:
-                candidates = candidates.filter(branch__name__icontains=branch_pref)
+            # Apply branch filter using smart expansion
+            if branch_filter:
+                candidates = candidates.filter(branch_filter)
 
-            # Fallback without upper bound if branch filter yields 0
+            # Fallback: if branch filter yields 0 results, try without upper bound
             if branch_pref and not candidates.exists():
                 fallback_q = Q(
                     year=latest_year,
-                    category=category,
+                    category=effective_category,
                     seat_pool=gender,
                     round_number=round_num,
                     closing_rank__gte=1,
@@ -475,9 +568,10 @@ class _RoundWiseResultBase(View):
                         fallback_q &= Q(quota='AI')
                     else:
                         fallback_q &= Q(quota__in=['AI', 'OS'])
-                candidates = Cutoff.objects.filter(fallback_q).filter(
-                    branch__name__icontains=branch_pref
-                ).select_related('college', 'branch').order_by('closing_rank')
+                candidates = Cutoff.objects.filter(fallback_q)
+                if branch_filter:
+                    candidates = candidates.filter(branch_filter)
+                candidates = candidates.select_related('college', 'branch').order_by('closing_rank')
 
             seen = set()
             results = []
@@ -503,17 +597,19 @@ class _RoundWiseResultBase(View):
                         'opening_rank': c.opening_rank,
                         'round_number': round_num,
                         'inst_type': self._get_institute_type(c.college.name),
+                        'seat_type': effective_category,
+                        'college_state': c.college.state or '',
                     }
                     # Add IIT tier for Advanced exam type
                     if exam_type == 'advanced':
                         result_entry['iit_tier'] = self._get_iit_tier(c.college.name)
                     results.append(result_entry)
 
-            # Sort and limit
+            # Sort and limit — increased limits for better results
             results.sort(key=lambda x: x['prob'], reverse=True)
-            safe = [r for r in results if r['status'] == 'Safe'][:25]
-            target = [r for r in results if r['status'] == 'Target'][:25]
-            dream = [r for r in results if r['status'] == 'Dream'][:25]
+            safe = [r for r in results if r['status'] == 'Safe'][:40]
+            target = [r for r in results if r['status'] == 'Target'][:40]
+            dream = [r for r in results if r['status'] == 'Dream'][:40]
             balanced = safe + target + dream
             balanced.sort(key=lambda x: x['prob'], reverse=True)
 
@@ -528,6 +624,9 @@ class _RoundWiseResultBase(View):
             'results': selected_round_results,
             'total_found': len(selected_round_results),
             'latest_year': latest_year,
+            'info_tech_fallback': info_tech_fallback,
+            'original_branch_pref': original_branch_pref,
+            'seat_type': effective_category,
         }
 
 
@@ -537,9 +636,9 @@ class MainsResultView(_RoundWiseResultBase):
     def post(self, request):
         rank = request.POST.get('rank')
         category = request.POST.get('category', 'OPEN')
+        seat_type = request.POST.get('seat_type', '') or category
         gender = request.POST.get('gender', 'Gender-Neutral')
         state = request.POST.get('state', '')
-        branch_pref = request.POST.get('branch', '')
         branch_pref = request.POST.get('branch', '')
 
         if not rank:
@@ -550,25 +649,41 @@ class MainsResultView(_RoundWiseResultBase):
         except ValueError:
             return redirect('predict_mains')
 
-        data = self._build_round_wise_results(student_rank, category, gender, state, branch_pref, 'mains', request)
+        data = self._build_round_wise_results(
+            student_rank, category, gender, state, branch_pref, 'mains',
+            request, seat_type=seat_type
+        )
 
         # Save to session
         request.session['student_rank'] = rank
         request.session['category'] = category
+        request.session['seat_type'] = seat_type
         request.session['gender'] = gender
         request.session['state'] = state
         request.session['exam_type'] = 'mains'
+
+        # Collect unique college names and states across all rounds for filter dropdowns
+        all_colleges = set()
+        all_states = set()
+        for rnd_results in data['round_data'].values():
+            for r in rnd_results:
+                all_colleges.add(r['college_name'])
+                if r.get('college_state'):
+                    all_states.add(r['college_state'])
 
         return render(request, 'prediction/result_mains.html', {
             'active_page': 'predict',
             'rank': rank,
             'category': category,
+            'seat_type': data.get('seat_type', seat_type),
             'gender': gender,
             'results': data['results'],
             'total_found': data['total_found'],
             'rounds': data['rounds'],
             'selected_round': data['selected_round'],
             'round_data_json': json.dumps(data['round_data']),
+            'college_names_json': json.dumps(sorted(all_colleges)),
+            'state_names_json': json.dumps(sorted(all_states)),
         })
 
 
@@ -578,9 +693,9 @@ class AdvancedResultView(_RoundWiseResultBase):
     def post(self, request):
         rank = request.POST.get('rank')
         category = request.POST.get('category', 'OPEN')
+        seat_type = request.POST.get('seat_type', '') or category
         gender = request.POST.get('gender', 'Gender-Neutral')
         state = request.POST.get('state', '')
-        branch_pref = request.POST.get('branch', '')
         branch_pref = request.POST.get('branch', '')
 
         if not rank:
@@ -591,7 +706,10 @@ class AdvancedResultView(_RoundWiseResultBase):
         except ValueError:
             return redirect('predict_advanced')
 
-        data = self._build_round_wise_results(student_rank, category, gender, state, branch_pref, 'advanced', request)
+        data = self._build_round_wise_results(
+            student_rank, category, gender, state, branch_pref, 'advanced',
+            request, seat_type=seat_type
+        )
 
         # Count IIT tiers in the selected round results
         tier_counts = {'Top': 0, 'Mid': 0, 'New': 0}
@@ -603,14 +721,25 @@ class AdvancedResultView(_RoundWiseResultBase):
         # Save to session
         request.session['student_rank'] = rank
         request.session['category'] = category
+        request.session['seat_type'] = seat_type
         request.session['gender'] = gender
         request.session['state'] = state
         request.session['exam_type'] = 'advanced'
+
+        # Collect unique college names and states across all rounds for filter dropdowns
+        all_colleges = set()
+        all_states = set()
+        for rnd_results in data['round_data'].values():
+            for r in rnd_results:
+                all_colleges.add(r['college_name'])
+                if r.get('college_state'):
+                    all_states.add(r['college_state'])
 
         return render(request, 'prediction/result_advanced.html', {
             'active_page': 'predict',
             'rank': rank,
             'category': category,
+            'seat_type': data.get('seat_type', seat_type),
             'gender': gender,
             'results': data['results'],
             'total_found': data['total_found'],
@@ -618,21 +747,29 @@ class AdvancedResultView(_RoundWiseResultBase):
             'selected_round': data['selected_round'],
             'round_data_json': json.dumps(data['round_data']),
             'tier_counts': tier_counts,
+            'info_tech_fallback': data.get('info_tech_fallback', False),
+            'original_branch_pref': data.get('original_branch_pref', ''),
+            'college_names_json': json.dumps(sorted(all_colleges)),
+            'state_names_json': json.dumps(sorted(all_states)),
         })
 
 
 
 class RecommendationView(View):
     def get(self, request):
-        rank = request.session.get('student_rank')
-        category = request.session.get('category')
-        gender = request.session.get('gender')
+        rank = request.GET.get('rank') or request.session.get('student_rank') or '15000'
+        category = request.GET.get('category') or request.session.get('category') or 'OPEN'
+        gender = request.GET.get('gender') or request.session.get('gender') or 'Gender-Neutral'
+        state = request.GET.get('state') or request.session.get('state') or ''
+        branch = request.GET.get('branch') or request.session.get('branch') or request.session.get('branch_pref') or ''
 
-        if not rank:
-            return redirect('predict')
+        try:
+            student_rank = int(rank)
+        except (ValueError, TypeError):
+            student_rank = 15000
 
         engine = RecommendationEngine()
-        strategy = engine.generate_strategy(int(rank), category, gender, state=request.session.get('state', ''))
+        strategy = engine.generate_strategy(student_rank, category, gender, state=state, branch=branch)
 
         overall_chance = 0
         all_colleges = strategy.get('safe', []) + strategy.get('target', []) + strategy.get('dream', [])
@@ -640,17 +777,21 @@ class RecommendationView(View):
             overall_chance = max([c['admission_probability'] for c in all_colleges])
 
         total_options = len(all_colleges)
-        best_roi = strategy['safe'][0] if strategy.get('safe') else (strategy['target'][0] if strategy.get('target') else None)
+        best_roi = strategy['safe'][0] if strategy.get('safe') else (strategy['target'][0] if strategy.get('target') else (strategy['dream'][0] if strategy.get('dream') else None))
 
         return render(request, 'prediction/recommendation.html', {
             'active_page': 'predict',
-            'rank': rank,
+            'rank': student_rank,
             'category': category,
             'gender': gender,
+            'branch': branch,
             'overall_chance': int(overall_chance),
             'strategy': strategy,
             'best_roi': best_roi,
             'total_options': total_options,
+            'trend_years_json': json.dumps(strategy.get('trend_years', ['2021', '2022', '2023', '2024', '2025'])),
+            'trend_ranks_json': json.dumps(strategy.get('trend_ranks', [5200, 4800, 4500, 4300, 4100])),
+            'trend_title': strategy.get('trend_title', 'Closing Rank Trend'),
         })
 
 
@@ -1202,7 +1343,7 @@ class ChatView(View):
                 lines = [f"**Top Colleges with Fees under ₹{max_fee/100000:.0f} Lakh:**\n"]
                 for i, c in enumerate(colleges, 1):
                     pkg = f"₹{float(c.average_package):.1f} LPA" if c.average_package else "N/A"
-                    fee = f"₹{float(c.average_fees):,.0f}" if c.average_fees else "N/A"
+                    fee = f"₹{float(c.average_fees)/100000:.2f}L" if c.average_fees else "N/A"
                     lines.append(f"{i}. **{c.name}** ({c.state})")
                     lines.append(f"   • Fees: {fee} | Avg Package: {pkg}")
                     if c.average_fees and c.average_package and float(c.average_fees) > 0:
@@ -1243,7 +1384,7 @@ class ChatView(View):
                 if college.nirf_rank:
                     lines.append(f"🏅 NIRF Rank: **#{college.nirf_rank}**")
                 if college.average_fees:
-                    lines.append(f"💰 Fees: ₹{float(college.average_fees):,.0f}")
+                    lines.append(f"💰 Fees: ₹{float(college.average_fees)/100000:.2f}L")
                 if college.average_package:
                     lines.append(f"📈 Avg Package: ₹{float(college.average_package):.1f} LPA")
                 
@@ -1314,3 +1455,53 @@ class ChatView(View):
                     return JsonResponse({'response': f"I found **{college_match.name}** ({college_match.state}).\n\nIn {latest_year}, cutoffs ranged from **{int(cutoff_stats['min_rank']):,}** to **{int(cutoff_stats['max_rank']):,}** (OPEN category).\n\n*Tell me your rank and I can check exactly which branches you'd qualify for!*"})
 
         return JsonResponse({'response': "I'd love to help! To give you the most accurate answer, please include:\n\n• **Your JEE rank** (e.g., 15000)\n• **Branch preference** (e.g., CSE, ECE, IT)\n• **Category** (e.g., OPEN, OBC, SC, ST, EWS)\n\nExample: *\"Which colleges can I get at rank 12000 for CSE in OBC?\"*\n\nYou can also ask me about specific colleges, branch comparisons, CSAB, or fee-based recommendations!"})
+
+
+class ModelInspectorView(View):
+    """View to inspect all trained ML models — accuracy, features, hyperparameters, etc."""
+
+    def get(self, request):
+        import os
+        from django.conf import settings
+
+        report_path = os.path.join(settings.BASE_DIR, 'ml_models', 'model_report.json')
+        models_data = {}
+
+        if os.path.exists(report_path):
+            with open(report_path, 'r') as f:
+                models_data = json.load(f)
+
+        # Determine best model by accuracy
+        best_model = None
+        best_accuracy = 0
+        for key, info in models_data.items():
+            if info.get('accuracy', 0) > best_accuracy:
+                best_accuracy = info['accuracy']
+                best_model = key
+
+        # Check which model files exist on disk
+        model_files = {
+            'xgboost': os.path.join(settings.BASE_DIR, 'ml_models', 'xgboost_admission_model.pkl'),
+        }
+
+        available_models = {k: os.path.exists(v) for k, v in model_files.items()}
+
+        # File sizes
+        model_sizes = {}
+        for key, path in model_files.items():
+            if os.path.exists(path):
+                size_bytes = os.path.getsize(path)
+                if size_bytes > 1024 * 1024:
+                    model_sizes[key] = f"{size_bytes / (1024 * 1024):.1f} MB"
+                else:
+                    model_sizes[key] = f"{size_bytes / 1024:.1f} KB"
+
+        return render(request, 'prediction/model_inspector.html', {
+            'active_page': 'models',
+            'models_data': models_data,
+            'models_data_json': json.dumps(models_data),
+            'best_model': best_model,
+            'available_models': available_models,
+            'model_sizes': model_sizes,
+            'total_trained': len(models_data),
+        })

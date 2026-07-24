@@ -11,6 +11,10 @@ from cutoffs.models import Cutoff
 class PredictionService:
     def __init__(self):
         self.xgb_model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'xgboost_admission_model.pkl')
+        self.dt_model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'decision_tree_model.pkl')
+        self.rf_model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'random_forest_model.pkl')
+        self.lr_model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'logistic_regression_model.pkl')
+        self.lr_scaler_path = os.path.join(settings.BASE_DIR, 'ml_models', 'lr_scaler.pkl')
         
         self.le_college_path = os.path.join(settings.BASE_DIR, 'ml_models', 'le_college.pkl')
         self.le_branch_path = os.path.join(settings.BASE_DIR, 'ml_models', 'le_branch.pkl')
@@ -18,6 +22,7 @@ class PredictionService:
         self.le_seat_pool_path = os.path.join(settings.BASE_DIR, 'ml_models', 'le_seat_pool.pkl')
         
         self.models = {}
+        self.lr_scaler = None
         self.le_college = None
         self.le_branch = None
         self.le_category = None
@@ -32,6 +37,22 @@ class PredictionService:
             
         if 'xgboost' not in self.models and os.path.exists(self.xgb_model_path):
             self.models['xgboost'] = joblib.load(self.xgb_model_path)
+
+        if 'decision_tree' not in self.models and os.path.exists(self.dt_model_path):
+            self.models['decision_tree'] = joblib.load(self.dt_model_path)
+
+        if 'random_forest' not in self.models and os.path.exists(self.rf_model_path):
+            self.models['random_forest'] = joblib.load(self.rf_model_path)
+
+        if 'logistic_regression' not in self.models and os.path.exists(self.lr_model_path):
+            self.models['logistic_regression'] = joblib.load(self.lr_model_path)
+            if os.path.exists(self.lr_scaler_path):
+                self.lr_scaler = joblib.load(self.lr_scaler_path)
+
+    def get_available_models(self):
+        """Returns a list of model keys that are currently trained and available."""
+        self._load_models()
+        return list(self.models.keys())
 
     def predict_admission_probability(self, college_id, branch_id, category, seat_pool, student_rank, model_type='xgboost'):
         """Returns the admission probability using the specified model."""
@@ -76,8 +97,14 @@ class PredictionService:
             'seat_pool_encoded': pool_encoded,
             'student_rank': student_rank
         }])
+
+        # Logistic regression needs scaling
+        if model_type == 'logistic_regression' and self.lr_scaler:
+            features_input = self.lr_scaler.transform(features)
+        else:
+            features_input = features
         
-        probability = model.predict_proba(features)[0][1]
+        probability = model.predict_proba(features_input)[0][1]
         return int(round(probability * 100, 0))
 
     def predict_batch(self, inputs, model_type='xgboost'):
@@ -110,8 +137,14 @@ class PredictionService:
         df['seat_pool_encoded'] = df['seat_pool'].apply(lambda x: safe_encode(self.le_seat_pool, x))
         
         features = df[['college_encoded', 'branch_encoded', 'category_encoded', 'seat_pool_encoded', 'student_rank']]
+
+        # Logistic regression needs scaling
+        if model_type == 'logistic_regression' and self.lr_scaler:
+            features_input = self.lr_scaler.transform(features)
+        else:
+            features_input = features
         
-        probs = model.predict_proba(features)[:, 1]
+        probs = model.predict_proba(features_input)[:, 1]
         
         return [int(round(p * 100, 0)) for p in probs]
 

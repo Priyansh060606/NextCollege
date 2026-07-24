@@ -73,9 +73,9 @@
 <section class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
     <!-- Left: Tab Triggers (Visual) -->
     <div class="lg:col-span-3 space-y-3 sticky top-24">
-        <button class="w-full flex items-center justify-between p-8 rounded-2xl bg-white shadow-sm border border-outline-variant/30 hover:border-orange-500/50 transition-all text-left group tab-trigger" id="tab-dream" onclick="switchTab('dream')">
+        <button class="w-full flex items-center justify-between p-8 rounded-2xl bg-white shadow-sm border border-outline-variant/30 hover:border-amber-500/50 transition-all text-left group tab-trigger" id="tab-dream" onclick="switchTab('dream')">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 group-[.active]:bg-orange-500 group-[.active]:text-white transition-colors">
+                <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700 group-[.active]:bg-amber-500 group-[.active]:text-white transition-colors">
                     <span class="material-symbols-outlined">rocket_launch</span>
                 </div>
                 <div>
@@ -83,11 +83,11 @@
                     <p class="text-[15px] text-on-surface-variant">Probability &lt; 40%</p>
                 </div>
             </div>
-            <span class="material-symbols-outlined text-outline group-[.active]:text-primary">chevron_right</span>
+            <span class="material-symbols-outlined text-outline group-[.active]:text-amber-500">chevron_right</span>
         </button>
-        <button class="w-full flex items-center justify-between p-8 rounded-2xl bg-white shadow-sm border border-outline-variant/30 hover:border-primary/50 transition-all text-left group tab-trigger active border-2 border-primary" id="tab-target" onclick="switchTab('target')">
+        <button class="w-full flex items-center justify-between p-8 rounded-2xl bg-white shadow-sm border border-outline-variant/30 hover:border-blue-500/50 transition-all text-left group tab-trigger active border-2 border-blue-600" id="tab-target" onclick="switchTab('target')">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-primary-container/10 flex items-center justify-center text-primary group-[.active]:bg-primary group-[.active]:text-white transition-colors bg-primary text-white">
+                <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-700 group-[.active]:bg-blue-600 group-[.active]:text-white transition-colors bg-blue-600 text-white">
                     <span class="material-symbols-outlined">location_on</span>
                 </div>
                 <div>
@@ -95,11 +95,11 @@
                     <p class="text-[15px] text-on-surface-variant">Probability 40-79%</p>
                 </div>
             </div>
-            <span class="material-symbols-outlined text-primary">chevron_right</span>
+            <span class="material-symbols-outlined text-blue-600">chevron_right</span>
         </button>
-        <button class="w-full flex items-center justify-between p-8 rounded-2xl bg-white shadow-sm border border-outline-variant/30 hover:border-green-500/50 transition-all text-left group tab-trigger" id="tab-safe" onclick="switchTab('safe')">
+        <button class="w-full flex items-center justify-between p-8 rounded-2xl bg-white shadow-sm border border-outline-variant/30 hover:border-emerald-500/50 transition-all text-left group tab-trigger" id="tab-safe" onclick="switchTab('safe')">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center text-green-600 group-[.active]:bg-green-500 group-[.active]:text-white transition-colors">
+                <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-700 group-[.active]:bg-emerald-600 group-[.active]:text-white transition-colors">
                     <span class="material-symbols-outlined">verified_user</span>
                 </div>
                 <div>
@@ -107,7 +107,7 @@
                     <p class="text-[15px] text-on-surface-variant">Probability &ge; 80%</p>
                 </div>
             </div>
-            <span class="material-symbols-outlined text-outline group-[.active]:text-primary">chevron_right</span>
+            <span class="material-symbols-outlined text-outline group-[.active]:text-emerald-600">chevron_right</span>
         </button>
         
         <!-- Upgrade CTA Card -->
@@ -154,10 +154,10 @@
                             <p class="text-on-surface-variant text-[15px]">{{ result.branch_name }}</p>
                         </div>
                         <div class="text-right shrink-0">
-                            <div class="flex items-center justify-center w-12 h-12 rounded-full border-[3px] {% if result.prob < 40 %}border-error/20 text-error{% elif result.prob < 75 %}border-secondary/20 text-secondary{% else %}border-on-tertiary-container/20 text-on-tertiary-container{% endif %} relative">
+                            <div class="flex items-center justify-center w-12 h-12 rounded-full border-[3px] {% if result.prob < 40 %}border-amber-200 text-amber-600{% elif result.prob < 75 %}border-blue-200 text-blue-600{% else %}border-emerald-200 text-emerald-600{% endif %} relative">
                                 <span class="text-[15px] font-bold">{{ result.prob }}%</span>
                                 <svg class="absolute inset-0 -rotate-90 w-full h-full" viewbox="0 0 36 36">
-                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" class="{% if result.prob < 40 %}stroke-error{% elif result.prob < 75 %}stroke-secondary{% else %}stroke-on-tertiary-container{% endif %}" stroke-dasharray="{{ result.prob }}, 100" stroke-width="3"></path>
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" class="{% if result.prob < 40 %}stroke-amber-500{% elif result.prob < 75 %}stroke-blue-500{% else %}stroke-emerald-500{% endif %}" stroke-dasharray="{{ result.prob }}, 100" stroke-width="3"></path>
                                 </svg>
                             </div>
                         </div>
@@ -192,30 +192,31 @@
         // Update Tab styles
         const tabs = document.querySelectorAll('.tab-trigger');
         tabs.forEach(tab => {
-            tab.classList.remove('active', 'border-2', 'border-primary');
+            tab.classList.remove('active', 'border-2', 'border-amber-500', 'border-blue-600', 'border-emerald-500');
             tab.classList.add('border-outline-variant/30');
             const iconDiv = tab.querySelector('div > div');
-            iconDiv.classList.remove('bg-orange-500', 'bg-primary', 'bg-green-500', 'text-white');
+            iconDiv.classList.remove('bg-amber-500', 'bg-blue-600', 'bg-emerald-500', 'bg-amber-100', 'bg-blue-100', 'bg-emerald-100', 'text-amber-700', 'text-blue-700', 'text-emerald-700', 'text-white');
             
-            if(tab.id.includes('dream')) iconDiv.classList.add('bg-orange-100', 'text-orange-600');
-            if(tab.id.includes('target')) iconDiv.classList.add('bg-primary-container/10', 'text-primary');
-            if(tab.id.includes('safe')) iconDiv.classList.add('bg-green-100', 'text-green-600');
+            if(tab.id.includes('dream')) iconDiv.classList.add('bg-amber-100', 'text-amber-700');
+            if(tab.id.includes('target')) iconDiv.classList.add('bg-blue-100', 'text-blue-700');
+            if(tab.id.includes('safe')) iconDiv.classList.add('bg-emerald-100', 'text-emerald-700');
         });
 
         const activeTab = document.getElementById(`tab-${type}`);
-        activeTab.classList.add('active', 'border-2', 'border-primary');
+        const activeBorder = type === 'dream' ? 'border-amber-500' : (type === 'target' ? 'border-blue-600' : 'border-emerald-500');
+        activeTab.classList.add('active', 'border-2', activeBorder);
         activeTab.classList.remove('border-outline-variant/30');
         const activeIconDiv = activeTab.querySelector('div > div');
-        activeIconDiv.classList.remove('bg-orange-100', 'bg-primary-container/10', 'bg-green-100', 'text-orange-600', 'text-primary', 'text-green-600');
+        activeIconDiv.classList.remove('bg-amber-100', 'bg-blue-100', 'bg-emerald-100', 'text-amber-700', 'text-blue-700', 'text-emerald-700');
         
         if(type === 'dream') {
-            activeIconDiv.classList.add('bg-orange-500', 'text-white');
+            activeIconDiv.classList.add('bg-amber-500', 'text-white');
             document.getElementById('section-title').innerText = "Dream Colleges (Ambitious)";
         } else if(type === 'target') {
-            activeIconDiv.classList.add('bg-primary', 'text-white');
+            activeIconDiv.classList.add('bg-blue-600', 'text-white');
             document.getElementById('section-title').innerText = "Target Colleges for You";
         } else {
-            activeIconDiv.classList.add('bg-green-500', 'text-white');
+            activeIconDiv.classList.add('bg-emerald-500', 'text-white');
             document.getElementById('section-title').innerText = "Safe Colleges (High Probability)";
         }
 

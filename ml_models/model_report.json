@@ -1,0 +1,37 @@
+{
+  "xgboost": {
+    "name": "XGBoost Classifier",
+    "type": "Ensemble (Gradient Boosting)",
+    "accuracy": 0.7757,
+    "precision": 0.777,
+    "recall": 0.7757,
+    "f1_score": 0.7755,
+    "confusion_matrix": [
+      [
+        19545,
+        6753
+      ],
+      [
+        5005,
+        21113
+      ]
+    ],
+    "feature_importances": {
+      "college_id": 0.16758164763450623,
+      "branch_id": 0.13161583244800568,
+      "category_encoded": 0.26260530948638916,
+      "seat_pool_encoded": 0.15043187141418457,
+      "student_rank": 0.28776535391807556
+    },
+    "hyperparameters": {
+      "n_estimators": 100,
+      "learning_rate": 0.1,
+      "max_depth": 6,
+      "objective": "binary:logistic"
+    },
+    "training_samples": 209660,
+    "test_samples": 52416,
+    "trained_at": "2026-07-21T19:18:12.120932",
+    "model_file": "xgboost_admission_model.pkl"
+  }
+}
